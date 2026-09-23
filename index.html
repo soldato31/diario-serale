@@ -278,6 +278,18 @@ a{color:var(--ac)}
 @media (max-width:380px){.qgrid{grid-template-columns:repeat(2,1fr)}.rate{grid-template-columns:repeat(2,1fr)}}
 @media print{body.printing>*:not(#print){display:none!important}body.printing #print{display:block;color:#000;background:#fff;font:12px/1.4 Arial,sans-serif;padding:10px}
 #print h1{font-size:20px;color:#000}#print table{border-collapse:collapse;width:100%}#print th,#print td{border:1px solid #999;padding:4px 6px;text-align:left}html,body{background:#fff}}
+/* v3 */
+.lesson.blocked{opacity:.5;border-color:rgba(226,114,91,.35);background:repeating-linear-gradient(135deg,var(--card2) 0 10px,rgba(226,114,91,.06) 10px 20px)}
+em.blk{font-style:normal;font-size:10.5px;font-weight:700;margin-left:6px;padding:2px 6px;border-radius:6px;background:rgba(226,114,91,.18);color:var(--bad);text-transform:uppercase;letter-spacing:.03em}
+.subbox{border:1px dashed var(--line);border-radius:12px;padding:10px 10px 2px;margin:4px 0 12px}
+.fbbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:10px 0 2px;font-size:13px}
+.stbtn{flex:none;min-width:92px;font-size:11.5px;font-weight:600;padding:5px 8px;border-radius:8px;border:1px solid;background:transparent;cursor:pointer}
+.minibar{position:relative;height:5px;background:var(--card2);border-radius:5px;margin:6px 0 4px;overflow:hidden}
+.minibar i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:var(--ac)}
+.lvsel{flex:none;width:auto;background:var(--card2);color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:5px 6px;font-size:12.5px}
+.steps{margin:6px 0 8px;padding-left:20px;font-size:14px;line-height:1.5}
+.steps li{margin-bottom:6px}
+.steps a{color:var(--ac2)}
 
 </style>
 </head>
@@ -504,6 +516,65 @@ function libKeyFor(name){if(!name)return null;const n=name.toLowerCase();
 function matchTopics(key,text){if(!key||!text)return[];const t=text.toLowerCase();
   return LIB[key].topics.map(tp=>({tp,score:tp.k.reduce((a,k)=>a+(t.includes(k.toLowerCase())?k.length:0),0)+(t.includes(tp.t.toLowerCase())?50:0)})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).map(x=>x.tp)}
 
+/* ============ PROGRAMMI (indicativi, linee guida istituti tecnici MME) ============ */
+const SYL={
+1:{
+'Italiano':['Fonologia e ortografia','Morfologia: le parti del discorso','Analisi logica','Il testo narrativo','Il riassunto','Testo descrittivo ed espositivo','Epica: Iliade e Odissea'],
+'Storia':['Preistoria','Civiltà mesopotamiche ed Egitto','La Grecia antica','Roma: monarchia e repubblica'],
+'Inglese':['Present simple e continuous','Past simple e verbi irregolari','Articoli, pronomi, possessivi','Can, must, have to','Comparativi e superlativi','Lessico quotidiano e tecnico di base'],
+'Matematica':['Insiemi numerici','Potenze e proprietà','Frazioni, proporzioni e percentuali','Monomi e polinomi','Prodotti notevoli','Scomposizione in fattori','Frazioni algebriche','Equazioni di primo grado','Problemi con le equazioni','Geometria: enti fondamentali e triangoli','Statistica descrittiva di base'],
+'Fisica':['Grandezze e unità di misura','Notazione scientifica','Errori di misura','Vettori','Forze ed equilibrio','Momento di una forza e leve','Pressione e fluidi'],
+'Chimica':['Materia e stati di aggregazione','Miscugli e tecniche di separazione','Trasformazioni fisiche e chimiche','Leggi ponderali','Atomo e particelle subatomiche','Tavola periodica','La mole'],
+'Scienze integrate':['Universo e sistema solare','La Terra: struttura e moti','Atmosfera e idrosfera','Minerali e rocce','Vulcani e terremoti'],
+'Disegno tecnico':['Strumenti e formati','Tipi di linea','Scale di rappresentazione','Costruzioni geometriche','Proiezioni ortogonali','Assonometrie','Quotatura di base','Introduzione al CAD'],
+'Tecnologie informatiche':['Hardware e architettura','Sistemi di numerazione','Sistema operativo e file','Videoscrittura','Foglio di calcolo','Algoritmi e diagrammi di flusso','Reti e sicurezza'],
+'Diritto ed economia':['Norma giuridica e fonti del diritto','Soggetti del diritto','Stato e forme di governo','Costituzione: principi fondamentali','Bisogni, beni e sistema economico']
+},
+2:{
+'Italiano':['Sintassi della frase complessa','Testo argomentativo','Poesia: figure retoriche e metrica','I Promessi Sposi','Relazione tecnica'],
+'Storia':['Impero romano','Diffusione del cristianesimo','Caduta dell\'impero d\'Occidente','Alto Medioevo','Carlo Magno e feudalesimo'],
+'Inglese':['Present perfect','Futuro: will e going to','Periodo ipotetico 0 e 1','Forma passiva','Lettura di testi tecnici semplici'],
+'Matematica':['Disequazioni di primo grado','Sistemi lineari','Piano cartesiano e retta','Radicali','Equazioni di secondo grado','Disequazioni di secondo grado','Sistemi di secondo grado','Probabilità di base','Geometria: circonferenza, Pitagora, similitudine'],
+'Fisica':['Moto rettilineo uniforme','Moto uniformemente accelerato','Principi della dinamica','Moto circolare','Lavoro, energia, potenza','Temperatura e calore','Carica, corrente e legge di Ohm'],
+'Chimica':['Configurazione elettronica','Legami chimici','Nomenclatura','Reazioni e stechiometria','Soluzioni e concentrazione','Acidi, basi e pH','Ossidoriduzioni'],
+'Scienze integrate':['La cellula','Biomolecole','DNA ed ereditarietà','Corpo umano: apparati','Ecologia'],
+'Disegno tecnico':['Sezioni','Quotatura funzionale','Tolleranze e rugosità','Filettature e collegamenti','Disegno di particolari meccanici','CAD 2D'],
+'Scienze e tecnologie applicate':['Materiali metallici','Proprietà dei materiali','Prove sui materiali','Metrologia','Lavorazioni per asportazione','Sicurezza sul lavoro'],
+'Diritto ed economia':['Parlamento, Governo, Presidente, Magistratura','Diritti e doveri dei cittadini','Unione Europea','Mercato: domanda e offerta','Moneta, inflazione, PIL','Lavoro e contratti']
+},
+3:{
+'Italiano':['Letteratura delle origini e Duecento','Dante e l\'Inferno','Petrarca e Boccaccio','Umanesimo e Rinascimento','Tipologie testuali dell\'esame di Stato'],
+'Storia':['Basso Medioevo','Comuni e Signorie','Scoperte geografiche','Riforma e Controriforma','Stati nazionali'],
+'Inglese':['Past continuous e past perfect','Verbi modali','Microlingua: materiali e macchine utensili','Microlingua: sicurezza','Descrivere un processo produttivo'],
+'Matematica':['Equazioni con valore assoluto e irrazionali','Funzioni e loro proprietà','Parabola, circonferenza, ellisse, iperbole','Esponenziali e logaritmi','Goniometria e trigonometria'],
+'Complementi di matematica':['Statistica','Vettori e matrici','Numeri complessi (cenni)'],
+'Meccanica, macchine ed energia':['Statica e vincoli','Baricentri e momenti d\'inerzia','Sollecitazioni semplici','Cinematica e dinamica applicate','Attrito e rendimento','Idrostatica e idrodinamica'],
+'Sistemi e automazione':['Circuiti in corrente continua','Logica booleana e porte logiche','Pneumatica ed elettropneumatica','Sensori e trasduttori','Introduzione al PLC'],
+'Tecnologie meccaniche di processo e prodotto':['Materiali e diagramma ferro-carbonio','Trattamenti termici','Prove meccaniche','Fonderia e deformazione plastica','Saldatura','Metrologia e controlli'],
+'Disegno, progettazione e organizzazione industriale':['Norme e tolleranze ISO','Rugosità e stati superficiali','Collegamenti smontabili e fissi','Organi di trasmissione: alberi e cuscinetti','CAD 3D','Cicli di lavorazione']
+}};
+/* schede aggiuntive */
+LIB.scienze={name:'Scienze integrate',m:['scienze integrate','scienze della terra','biologia'],intro:'Scienze della Terra e Biologia: il pianeta, i fenomeni naturali, la vita. Materia del biennio, spesso oggetto di esame integrativo.',
+topics:[
+{t:'Sistema solare e moti della Terra',k:['solare','rotazion','rivoluzion','stagion','universo','pianet'],d:'Rotazione (24 h: giorno e notte) e rivoluzione (365 giorni: stagioni, per l\'inclinazione dell\'asse di circa 23,5°).',f:[]},
+{t:'Struttura interna della Terra',k:['crosta','mantello','nucleo','struttura','placche','tettonica'],d:'Crosta, mantello, nucleo. La tettonica a placche spiega terremoti, vulcani e catene montuose.',f:[]},
+{t:'Minerali e rocce',k:['mineral','rocce','magmatich','sedimentar','metamorfich'],d:'Rocce magmatiche, sedimentarie, metamorfiche: il ciclo litogenetico le trasforma l\'una nell\'altra.',f:[]},
+{t:'La cellula',k:['cellula','procariot','eucariot','membrana','organul'],d:'Procariote (senza nucleo) ed eucariote (con nucleo). Organuli principali: nucleo, mitocondri, ribosomi, reticolo, cloroplasti (vegetali).',f:[]},
+{t:'DNA ed ereditarietà',k:['dna','gene','mendel','ereditar','cromosom'],d:'Il DNA contiene l\'informazione genetica. Mendel: leggi della dominanza, segregazione, assortimento indipendente.',f:[]}
+],errors:['Confondere rotazione e rivoluzione.'],
+links:[{n:'Khan Academy Biologia',u:'https://it.khanacademy.org/science/biology',d:'Videolezioni'},{n:'INGV',u:'https://www.ingv.it',d:'Terremoti e vulcani, dati ufficiali'},{n:'Rai Scuola',u:'https://www.raiscuola.rai.it',d:'Documentari'}],tools:[]};
+LIB.dpoi={name:'Disegno, progettazione e organizzazione industriale',m:['progettaz','dpoi','organizzazione industriale'],intro:'Dal disegno al progetto: tolleranze, collegamenti, organi di macchine, cicli di lavorazione e organizzazione della produzione. Il tuo lavoro in fabbrica è materia viva qui.',
+topics:[
+{t:'Tolleranze ISO',k:['tolleranz','iso','accoppiament','gioco','interferenz'],d:'Sistema foro base (H) e albero base (h). Grado IT: più basso = più preciso.',f:['Tolleranza = scostamento superiore − scostamento inferiore']},
+{t:'Collegamenti',k:['collegament','vite','bullon','chiavett','linguett','saldat','rivett'],d:'Smontabili (viti, chiavette, linguette, spine) e fissi (saldature, rivetti, incollaggi).',f:[]},
+{t:'Alberi e cuscinetti',k:['alber','cuscinett','perno','supporto'],d:'Gli alberi trasmettono coppia; i cuscinetti (a sfere, a rulli) sostengono e riducono l\'attrito.',f:['Mt = 9549 · P / n  [N·m, kW, giri/min]']},
+{t:'Cicli di lavorazione',k:['ciclo','lavorazion','fase','sottofase','cartellino'],d:'Sequenza ordinata di fasi, sottofasi e operazioni per ottenere il pezzo, con macchine, utensili e tempi.',f:[]},
+{t:'Organizzazione della produzione',k:['produzion','lean','kanban','tempi','layout','qualità'],d:'Layout, tempi e metodi, lean production, qualità. Collega ciò che vedi in linea (EOL, takt time) alla teoria.',f:['Takt time = tempo disponibile / domanda']}
+],errors:['Scrivere tolleranze senza indicare il sistema (foro base o albero base).'],
+links:[{n:'FreeCAD',u:'https://www.freecad.org',d:'CAD 3D gratuito'},{n:'Onshape',u:'https://www.onshape.com',d:'CAD nel browser'},{n:'Engineering ToolBox',u:'https://www.engineeringtoolbox.com',d:'Dati tecnici'}],tools:['tab:toll','tab:rug','tab:filetti','tab:viti']};
+const _libKeyOld=libKeyFor;
+libKeyFor=function(name){if(!name)return null;const n=name.toLowerCase();if(LIB.dpoi.m.some(x=>n.includes(x)))return'dpoi';if(LIB.scienze.m.some(x=>n.includes(x)))return'scienze';if(n.includes('complementi'))return'matematica';return _libKeyOld(name)};
+
 /* ============ DATI VALIGIA DEGLI ATTREZZI ============ */
 const PT_RAW=`H|Idrogeno|1.008|nm;He|Elio|4.0026|ng;Li|Litio|6.94|am;Be|Berillio|9.0122|ae;B|Boro|10.81|md;C|Carbonio|12.011|nm;N|Azoto|14.007|nm;O|Ossigeno|15.999|nm;F|Fluoro|18.998|ha;Ne|Neon|20.180|ng;Na|Sodio|22.990|am;Mg|Magnesio|24.305|ae;Al|Alluminio|26.982|pt;Si|Silicio|28.085|md;P|Fosforo|30.974|nm;S|Zolfo|32.06|nm;Cl|Cloro|35.45|ha;Ar|Argon|39.948|ng;K|Potassio|39.098|am;Ca|Calcio|40.078|ae;Sc|Scandio|44.956|tm;Ti|Titanio|47.867|tm;V|Vanadio|50.942|tm;Cr|Cromo|51.996|tm;Mn|Manganese|54.938|tm;Fe|Ferro|55.845|tm;Co|Cobalto|58.933|tm;Ni|Nichel|58.693|tm;Cu|Rame|63.546|tm;Zn|Zinco|65.38|tm;Ga|Gallio|69.723|pt;Ge|Germanio|72.630|md;As|Arsenico|74.922|md;Se|Selenio|78.971|nm;Br|Bromo|79.904|ha;Kr|Kripton|83.798|ng;Rb|Rubidio|85.468|am;Sr|Stronzio|87.62|ae;Y|Ittrio|88.906|tm;Zr|Zirconio|91.224|tm;Nb|Niobio|92.906|tm;Mo|Molibdeno|95.95|tm;Tc|Tecnezio|98|tm;Ru|Rutenio|101.07|tm;Rh|Rodio|102.91|tm;Pd|Palladio|106.42|tm;Ag|Argento|107.87|tm;Cd|Cadmio|112.41|tm;In|Indio|114.82|pt;Sn|Stagno|118.71|pt;Sb|Antimonio|121.76|md;Te|Tellurio|127.60|md;I|Iodio|126.90|ha;Xe|Xeno|131.29|ng;Cs|Cesio|132.91|am;Ba|Bario|137.33|ae;La|Lantanio|138.91|la;Ce|Cerio|140.12|la;Pr|Praseodimio|140.91|la;Nd|Neodimio|144.24|la;Pm|Promezio|145|la;Sm|Samario|150.36|la;Eu|Europio|151.96|la;Gd|Gadolinio|157.25|la;Tb|Terbio|158.93|la;Dy|Disprosio|162.50|la;Ho|Olmio|164.93|la;Er|Erbio|167.26|la;Tm|Tulio|168.93|la;Yb|Itterbio|173.05|la;Lu|Lutezio|174.97|la;Hf|Afnio|178.49|tm;Ta|Tantalio|180.95|tm;W|Tungsteno|183.84|tm;Re|Renio|186.21|tm;Os|Osmio|190.23|tm;Ir|Iridio|192.22|tm;Pt|Platino|195.08|tm;Au|Oro|196.97|tm;Hg|Mercurio|200.59|tm;Tl|Tallio|204.38|pt;Pb|Piombo|207.2|pt;Bi|Bismuto|208.98|pt;Po|Polonio|209|pt;At|Astato|210|ha;Rn|Radon|222|ng;Fr|Francio|223|am;Ra|Radio|226|ae;Ac|Attinio|227|ac;Th|Torio|232.04|ac;Pa|Protoattinio|231.04|ac;U|Uranio|238.03|ac;Np|Nettunio|237|ac;Pu|Plutonio|244|ac;Am|Americio|243|ac;Cm|Curio|247|ac;Bk|Berkelio|247|ac;Cf|Californio|251|ac;Es|Einsteinio|252|ac;Fm|Fermio|257|ac;Md|Mendelevio|258|ac;No|Nobelio|259|ac;Lr|Laurenzio|266|ac;Rf|Rutherfordio|267|tm;Db|Dubnio|268|tm;Sg|Seaborgio|269|tm;Bh|Bohrio|270|tm;Hs|Hassio|277|tm;Mt|Meitnerio|278|un;Ds|Darmstadtio|281|un;Rg|Roentgenio|282|un;Cn|Copernicio|285|tm;Nh|Nihonio|286|un;Fl|Flerovio|289|un;Mc|Moscovio|290|un;Lv|Livermorio|293|un;Ts|Tennesso|294|un;Og|Oganesson|294|un`;
 const PT_CAT={am:['Metalli alcalini','#e07a5f'],ae:['Metalli alcalino-terrosi','#f2a65a'],tm:['Metalli di transizione','#6fa8dc'],pt:['Metalli del blocco p','#8fc18f'],md:['Semimetalli','#c7c46a'],nm:['Non metalli','#6cc5c0'],ha:['Alogeni','#b59ce0'],ng:['Gas nobili','#d98ab5'],la:['Lantanidi','#e0a458'],ac:['Attinidi','#d4a373'],un:['Proprietà non note','#9aa4b1']};
@@ -615,7 +686,7 @@ function fmtNum(x){if(x===null||x===undefined||!isFinite(x))return'—';const a=
 function fmtOhm(r){if(r>=1e6)return fmtNum(r/1e6)+' MΩ';if(r>=1e3)return fmtNum(r/1e3)+' kΩ';return fmtNum(r)+' Ω'}
 
 /* ============ UTILITÀ ============ */
-const APP_VER='2.0';
+const APP_VER='3.0';
 const KEY='diarioSerale_v1';
 const WD=['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];
 const WDL=['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
@@ -650,7 +721,7 @@ function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clea
 function vibrate(p){try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
 
 /* ============ DATI ============ */
-const AI_PROFILE='Studente adulto di 45 anni che lavora a turni in fabbrica (assemblaggio trasmissioni) e frequenta il corso serale di Meccanica e Meccatronica all\'IISS Marconi-Hack di Bari, primo periodo didattico. Ha esperienza pratica di elettronica, CNC, stampa 3D e fonica live. Preferisce spiegazioni dirette, concrete, con esempi d\'officina.';
+const AI_PROFILE='Studente adulto di 45 anni che lavora a turni in fabbrica (assemblaggio trasmissioni) e frequenta il corso serale di Meccanica e Meccatronica all\'IISS Marconi-Hack di Bari: è al primo anno e vuole accelerare per sostenere gli esami integrativi e passare al secondo o al terzo anno. Ha esperienza pratica di elettronica, CNC, stampa 3D e fonica live. Preferisce spiegazioni dirette, concrete, con esempi d\'officina.';
 function defaultSettings(){return{name:'',school:'IISS Marconi-Hack · Bari',course:'Serale · Meccanica e Meccatronica',
   slots:[['16:45','17:45'],['17:45','18:45'],['18:45','19:45'],['19:45','20:45'],['20:45','21:45']],
   reducedUntil:'2026-09-30',reducedEnd:'19:45',start:'2026-09-21',end:'2027-06-10',threshold:75,monte:0,fadPct:20,
@@ -658,7 +729,7 @@ function defaultSettings(){return{name:'',school:'IISS Marconi-Hack · Bari',cou
   registro:'',aiProfile:AI_PROFILE,gemKey:'',gemModel:'',aiDefault:'claude',notif:false,lastBackup:'',
   pomoWork:25,pomoBreak:5,
   shiftTypes:[{id:'M',name:'Mattino',start:'06:00',end:'14:00',color:'#6fa8dc'},{id:'P',name:'Pomeriggio',start:'14:00',end:'22:00',color:'#e07a5f'},{id:'N',name:'Notte',start:'22:00',end:'06:00',color:'#b59ce0'},{id:'R',name:'Riposo',start:'',end:'',color:'#8fc18f'}],
-  shiftCycle:[],shiftStart:'',shiftSat:false}}
+  shiftCycle:[],shiftStart:'',shiftSat:false,curYear:1,gClientId:''}}
 function defaults(){
   const subs=[
     ['Italiano',['Quaderno','Libro di italiano']],
@@ -676,22 +747,29 @@ function defaults(){
   return{v:2,settings:defaultSettings(),subjects:subs,
     contacts:[{id:'c1',name:'Prof. Salvemini',role:'Docente',sub:'s5',phone:'',email:'',note:''},{id:'c2',name:'Prof. Pasquale Rotolo',role:'Docente',sub:'s7',phone:'',email:'',note:''}],
     tt,diary:{},tasks:[],att:{},mat:{},notes:[],
-    cards:[],grades:[],journal:{},pomos:[],myf:[],shifts:{},notified:{},pomoRun:null};
+    cards:[],grades:[],journal:{},pomos:[],myf:[],shifts:{},notified:{},pomoRun:null,
+    ev:[],mast:{},lvl:{},prefs:{},doubts:[],learned:'',goal:{year:2,date:''},sylSt:{},sylAdd:{},sylDel:{},scr:[],ext:[],cr:{courses:[],work:[],mats:[],ann:[],map:{},synced:''},
+    limits:[{id:'lim1',type:'Malattia',from:'2026-09-21',to:'2026-10-31',notBefore:'19:00',notAfter:'',note:'Non posso uscire di casa prima delle 19'}]};
 }
 function migrate(s){
   const d=defaults();const o=Object.assign(d,s);
   o.settings=Object.assign(defaultSettings(),s.settings||{});
   if(!o.settings.aiProfile)o.settings.aiProfile=AI_PROFILE;
-  ['cards','grades','pomos','myf'].forEach(k=>{if(!Array.isArray(o[k]))o[k]=[]});
-  ['journal','shifts','notified','diary','att','mat','tt'].forEach(k=>{if(!o[k]||typeof o[k]!=='object')o[k]={}});
+  ['cards','grades','pomos','myf','ev','doubts','scr','ext'].forEach(k=>{if(!Array.isArray(o[k]))o[k]=[]});
+  ['journal','shifts','notified','diary','att','mat','tt','mast','lvl','prefs','sylSt','sylAdd','sylDel'].forEach(k=>{if(!o[k]||typeof o[k]!=='object')o[k]={}});
+  if(!o.goal||typeof o.goal!=='object')o.goal={year:2,date:''};
+  if(!Array.isArray(o.limits))o.limits=s.v>=3?[]:d.limits;
+  if(!o.cr||typeof o.cr!=='object')o.cr=d.cr;['courses','work','mats','ann'].forEach(k=>{if(!Array.isArray(o.cr[k]))o.cr[k]=[]});if(!o.cr.map)o.cr.map={};
+  if(s.v<3&&o.settings.aiProfile===s.settings?.aiProfile&&/primo periodo didattico/.test(o.settings.aiProfile))o.settings.aiProfile=AI_PROFILE;
   for(let x=1;x<=5;x++)if(!Array.isArray(o.tt[x]))o.tt[x]=[];
   o.subjects.forEach(x=>{if(x.credit===undefined)x.credit=false;if(!Array.isArray(x.materials))x.materials=[]});
-  o.v=2;return o;
+  o.v=3;return o;
 }
 function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.v)return migrate(s)}catch(e){}return defaults()}
 let st=load();
-let _idbT=null;
+let _idbT=null,_ver=0;
 function save(){
+  _ver++;
   try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){toast('Memoria piena: fai un backup')}
   clearTimeout(_idbT);_idbT=setTimeout(()=>{kvPut('state',JSON.stringify(st)).catch(()=>{});kvPut('snap-'+today(),JSON.stringify(st)).catch(()=>{})},1500);
 }
@@ -728,8 +806,11 @@ function lessonsFor(s){
     const c=row[x.i]||{},o=ov[x.i]||{};
     const sid=o.sub?(o.sub==='_none'?null:o.sub):c.sub;
     const pid=o.prof?(o.prof==='_none'?null:o.prof):c.prof;
-    const sub=subById(sid)||null;
-    return{...x,sub,prof:conById(pid)||null,topic:o.topic||'',note:o.note||'',sup:!!(o.sub||o.prof),credit:!!(sub&&sub.credit)};
+    let sub=subById(sid)||null,orig=null,prof=conById(pid)||null,subst=o.subst||null;
+    if(subst){if(subst.sub&&subst.sub!==(sub&&sub.id)){orig=sub;sub=subById(subst.sub)||sub}if(subst.who)prof={name:subst.who,sup:true}}
+    const lim=limitFor(s);let blocked=false,partial=false;
+    if(lim){const a=toMin(x.start),b=toMin(x.end),nb=lim.notBefore?toMin(lim.notBefore):0,na=lim.notAfter?toMin(lim.notAfter):1440;if(b<=nb||a>=na)blocked=true;else if(a<nb||b>na)partial=true}
+    return{...x,sub,orig,prof,subst,topic:o.topic||'',note:o.note||'',sup:!!(o.sub||o.prof||subst),credit:!!(sub&&sub.credit),blocked,partial,lim};
   });
 }
 function schedWindow(s){const L=lessonsFor(s);const real=L.filter(l=>l.sub&&!l.credit);if(real.length)return real;if(L.some(l=>l.sub))return[];return L}
@@ -740,16 +821,17 @@ function attendedMin(s){
   return schedWindow(s).reduce((acc,l)=>acc+Math.max(0,Math.min(b,toMin(l.end))-Math.max(a,toMin(l.start))),0);
 }
 function stats(){
-  let sch=0,att=0,days=0,abs=0,fad=0;const reasons={},t=today();
+  let sch=0,att=0,days=0,abs=0,fad=0,just=0;const reasons={},t=today();
   for(const[d,r]of Object.entries(st.att)){
     if(d>t||r.status==='off')continue;const m=schedMin(d);if(!m)continue;
     const a=attendedMin(d);if(a===null)continue;
     const running=d===t&&r.status==='present'&&!r.out;
     sch+=running?a:m;att+=Math.min(a,m);days++;
     if(r.status==='fad')fad+=Math.min(a,m);
+    if(!running)just+=Math.min(justMin(d),Math.max(0,m-Math.min(a,m)));
     if(r.status==='absent'){abs++;const k=r.reason||'Altro';reasons[k]=(reasons[k]||0)+1}
   }
-  return{sch,att,days,abs,fad,reasons,pct:sch?att/sch*100:100};
+  return{sch,att,days,abs,fad,just,reasons,pct:sch?att/sch*100:100,pctNet:sch-just>0?att/(sch-just)*100:100};
 }
 function missingDays(){
   const out=[],t=today();let d=st.settings.start||t,n=0;
@@ -767,7 +849,7 @@ function recentTopics(n){const out=[],seen=new Set();
   for(const d of Object.keys(st.diary).sort().reverse()){for(const l of lessonsFor(d)){if(l.topic&&l.sub){const k=l.sub.id+'|'+l.topic.toLowerCase();if(!seen.has(k)){seen.add(k);out.push({d,sub:l.sub,topic:l.topic,slot:l.i})}}}if(out.length>=n)break}
   return out.slice(0,n)}
 function matsFor(s){
-  const L=lessonsFor(s).filter(l=>!l.credit);if(!L.some(l=>l.sub)&&!(st.mat[s]&&(st.mat[s].extra||[]).length))return[];
+  const L=lessonsFor(s).filter(l=>!l.credit&&!l.blocked);if(!L.some(l=>l.sub)&&!(st.mat[s]&&(st.mat[s].extra||[]).length))return[];
   const out=[],has=n=>out.some(x=>x.name.toLowerCase()===n.toLowerCase());
   (st.settings.always||[]).forEach(m=>{if(!has(m))out.push({name:m,from:'sempre'})});
   L.forEach(l=>{if(l.sub)(l.sub.materials||[]).forEach(m=>{if(!has(m))out.push({name:m,from:l.sub.name})})});
@@ -795,6 +877,14 @@ function shiftConflict(d){
   if(!ov)return null;
   return{sh,lost:W.filter(l=>Math.min(toMin(l.end),e)-Math.max(toMin(l.start),s)>0),all:ov>=b-a};
 }
+
+/* ============ INDISPONIBILITÀ (malattia, lavoro, permessi) ============ */
+function limitFor(d){const L=(st.limits||[]).filter(l=>l.from&&l.to&&d>=l.from&&d<=l.to);if(!L.length)return null;
+  const nb=L.map(l=>l.notBefore).filter(Boolean).sort().pop()||'',na=L.map(l=>l.notAfter).filter(Boolean).sort()[0]||'';
+  return{type:L.map(l=>l.type).join(', '),notBefore:nb,notAfter:na,note:L.map(l=>l.note).filter(Boolean).join(' · '),to:L.map(l=>l.to).sort().pop()}}
+function justMin(d){const lim=limitFor(d);if(!lim)return 0;const r=st.att[d];if(!r||r.status==='off')return 0;
+  const nb=lim.notBefore?toMin(lim.notBefore):0,na=lim.notAfter?toMin(lim.notAfter):1440;
+  return schedWindow(d).reduce((a,l)=>{const s=toMin(l.start),e=toMin(l.end);return a+Math.max(0,Math.min(e,nb)-s)+Math.max(0,e-Math.max(s,na))},0)}
 
 /* ============ INTELLIGENZA ARTIFICIALE ============ */
 const GEM_BASE='https://generativelanguage.googleapis.com/v1beta';
@@ -824,7 +914,7 @@ async function gemini(prompt,{json=false,images=[],sys='',history=[]}={}){
   if(!model){const l=await gemModels(S.gemKey);model=pickModel(l);if(!model)throw new Error('Nessun modello Gemini disponibile per questa chiave.');S.gemModel=model;save()}
   const parts=[{text:prompt}];images.forEach(im=>parts.push({inline_data:{mime_type:im.mime,data:im.b64}}));
   const contents=history.filter(m=>m.text).map(m=>({role:m.role==='ai'?'model':'user',parts:[{text:m.text}]}));contents.push({role:'user',parts});
-  const body={contents,systemInstruction:{parts:[{text:(sys||'Sei un tutor paziente e preciso. Rispondi in italiano.')+'\nProfilo dello studente: '+(S.aiProfile||AI_PROFILE)}]},generationConfig:{temperature:.6}};
+  const body={contents,systemInstruction:{parts:[{text:(sys||'Sei un tutor paziente e preciso. Rispondi in italiano.')+'\nProfilo dello studente: '+(S.aiProfile||AI_PROFILE)+'\n'+(typeof learnerContext==='function'?learnerContext():'')+'\nAdatta difficoltà e lunghezza a questo profilo.'}]},generationConfig:{temperature:.6}};
   if(json)body.generationConfig.responseMimeType='application/json';
   const ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),90000);
   let r;try{r=await fetch(GEM_BASE+'/models/'+encodeURIComponent(model)+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':S.gemKey},body:JSON.stringify(body),signal:ctl.signal})}
@@ -838,7 +928,7 @@ async function gemini(prompt,{json=false,images=[],sys='',history=[]}={}){
   return txt;
 }
 /* ---- Claude: link con domanda precompilata ---- */
-function claudePrompt(core){return core+'\n\n(Contesto: '+(st.settings.aiProfile||AI_PROFILE)+')'}
+function claudePrompt(core){return core+'\n\n(Contesto: '+(st.settings.aiProfile||AI_PROFILE)+' '+(typeof learnerContext==='function'?learnerContext(true):'')+')'}
 async function askClaude(core){
   const p=claudePrompt(core);
   try{await navigator.clipboard.writeText(p)}catch(e){}
@@ -923,6 +1013,8 @@ VIEWS.today=()=>{
   const tonight=target===t;
   hdr(fmtLong(t)+' · '+S.school,(hr<13?'Buongiorno':hr<18?'Buon pomeriggio':'Buonasera')+(S.name?', '+S.name:''),'','',false);
   let h='';
+  const lim=limitFor(t);
+  if(lim&&isWeekday(t)){const lost=lessonsFor(t).filter(l=>l.sub&&(l.blocked||l.partial));h+=`<div class="shiftbar" style="border-color:var(--bad)" onclick="sub('limits')"><span>🩺</span><div><b>${esc(lim.type)} fino al ${fmtShort(lim.to)}</b>${lim.notBefore?' · ingresso dalle '+esc(lim.notBefore):''}${lost.length?`<br><small class="muted">Oggi perdi: ${esc([...new Set(lost.map(l=>l.sub.name))].join(', '))}. Ore giustificate.</small>`:''}</div></div>`}
   const sh=shiftFor(t);
   if(sh)h+=`<div class="shiftbar" style="border-color:${sh.color}"><span class="dot" style="background:${sh.color}"></span>Turno oggi: <b>${esc(sh.name)}</b>${sh.start?' '+esc(sh.start)+'–'+esc(sh.end):''}</div>`;
   if(isWeekday(t)&&schedMin(t))h+=attCard(t);
@@ -965,14 +1057,14 @@ function attChip(d){
   if(r.status==='fad')return'<span class="stchip f">a distanza</span>';
   return'<span class="stchip">no lezione</span>';
 }
-function checkIn(){const t=today();st.att[t]=Object.assign(st.att[t]||{},{status:'present',in:hm(nowMin()),out:''});save();toast('Check-in '+st.att[t].in);render()}
+function checkIn(){const t=today(),lim=limitFor(t);if(lim&&lim.notBefore&&nowMin()<toMin(lim.notBefore)&&!confirm('Hai impostato ingresso non prima delle '+lim.notBefore+'. Registrare comunque il check-in adesso?'))return;st.att[t]=Object.assign(st.att[t]||{},{status:'present',in:hm(nowMin()),out:''});save();toast('Check-in '+st.att[t].in);render()}
 function checkOut(){const r=st.att[today()];if(!r)return;r.out=hm(nowMin());save();toast('Check-out '+r.out);render()}
 function lessonList(d,live){
   const L=lessonsFor(d);if(!L.length)return'<p class="empty-s">Nessuna lezione.</p>';
   const N=nowMin(),isT=d===today();
   return'<div class="lessons">'+L.map(l=>{
     const now=live&&isT&&N>=toMin(l.start)&&N<toMin(l.end);
-    return`<button class="lesson ${now?'now':''} ${l.sub?'':'empty'} ${l.credit?'credit':''}" onclick="editLesson('${d}',${l.i})"><span class="lt">${l.start}<br><small>${l.end}</small></span><span class="lbar" style="background:${l.sub?l.sub.color:'var(--line)'}"></span><span class="lb"><b>${l.sub?esc(l.sub.name):'Ora da definire'}${now?'<em class="live">in corso</em>':''}${l.sup?'<em class="sup">variazione</em>':''}${l.credit?'<em class="sup">credito</em>':''}</b><small>${l.prof?esc(l.prof.name):(l.sub?'Docente non impostato':'Tocca per impostare')}</small>${l.topic?`<span class="topic">${esc(l.topic)}</span>`:''}</span></button>`;
+    return`<button class="lesson ${now?'now':''} ${l.sub?'':'empty'} ${l.credit?'credit':''} ${l.blocked?'blocked':''}" onclick="editLesson('${d}',${l.i})"><span class="lt">${l.start}<br><small>${l.end}</small></span><span class="lbar" style="background:${l.sub?l.sub.color:'var(--line)'}"></span><span class="lb"><b>${l.sub?esc(l.sub.name):'Ora da definire'}${now?'<em class="live">in corso</em>':''}${l.subst?'<em class="sup">supplenza</em>':l.sup?'<em class="sup">variazione</em>':''}${l.credit?'<em class="sup">credito</em>':''}${l.blocked?`<em class="blk">${esc((l.lim.type||'').toLowerCase())}</em>`:l.partial?`<em class="blk">dalle ${esc(l.lim.notBefore||'')}</em>`:''}</b><small>${l.prof?esc(l.prof.name)+(l.prof.sup?' (supplente)':''):(l.sub?'Docente non impostato':'Tocca per impostare')}${l.orig?' · al posto di '+esc(l.orig.name):''}${l.subst&&l.subst.room?' · '+esc(l.subst.room):''}</small>${l.topic?`<span class="topic">${esc(l.topic)}</span>`:''}</span></button>`;
   }).join('')+'</div>';
 }
 function matCard(d,tonight){
@@ -1020,6 +1112,8 @@ async function editLesson(d,i){
   sheet(`${fmtShort(d)} · ${l.start}–${l.end}`,
     fld('Materia',`<select id="f_sub" onchange="autoProf('f_sub','f_prof')">${subOpts(l.sub&&l.sub.id)}</select>`)+
     fld('Docente',`<select id="f_prof">${profOpts(l.prof&&l.prof.id)}</select>`)+
+    `<button type="button" class="chk ${l.subst?'on':''}" id="f_sb" onclick="this.classList.toggle('on');$('#f_sbx').style.display=this.classList.contains('on')?'block':'none'"><i></i><span>Supplenza o spostamento di classe</span></button>
+     <div id="f_sbx" class="subbox" style="display:${l.subst?'block':'none'}">${fld('Docente supplente',`<input id="f_sw" value="${esc(l.subst&&l.subst.who||'')}" placeholder="es. Prof. Rossi">`)}${fld('Materia svolta davvero',`<select id="f_ss">${subOpts(l.subst&&l.subst.sub||'')}</select>`)}${fld('Classe / aula',`<input id="f_sr" value="${esc(l.subst&&l.subst.room||'')}" placeholder="es. spostati in 2ª">`)}</div>`+
     `<p class="hint" style="margin:-4px 0 12px">Da orario: ${esc((subById(base.sub)||{}).name||'—')} · ${esc((conById(base.prof)||{}).name||'—')}. Cambia solo per supplenze o scambi d'ora.</p>`+
     `<label class="f"><span>Argomento svolto</span><div class="inrow"><input id="f_topic" value="${esc(l.topic)}" placeholder="es. Proiezioni ortogonali">${micBtn('f_topic')}</div></label>`+
     `<label class="f"><span>Appunti</span><div class="inrow top"><textarea id="f_note" rows="4" placeholder="Cosa ha detto il prof, cosa rivedere…">${esc(l.note)}</textarea>${micBtn('f_note')}</div></label>`+
@@ -1046,6 +1140,9 @@ function saveLesson(d,i,andTask,silent){
   if(sb!==(base.sub||''))o.sub=sb||'_none';
   if(pr!==(base.prof||''))o.prof=pr||'_none';
   if(topic)o.topic=topic;if(note)o.note=note;
+  if($('#f_sb')&&$('#f_sb').classList.contains('on')){o.subst={who:val('f_sw'),sub:val('f_ss'),room:val('f_sr')}}
+  if(topic){const tsub=subById((o.subst&&o.subst.sub)||sb);if(tsub&&(!st.diary[d]||!st.diary[d][i]||st.diary[d][i].topic!==topic))exposure(subjKeyOf(tsub),topic,'lezione')}
+  if(note)extractDoubts(/non (ho )?capit|non chiaro|dubbi|\?/i.test(note)?note:'',d);
   st.diary[d]=st.diary[d]||{};
   if(Object.keys(o).length)st.diary[d][i]=o;else delete st.diary[d][i];
   if(!Object.keys(st.diary[d]).length)delete st.diary[d];
@@ -1107,7 +1204,7 @@ function saveCell(D,i){
 VIEWS.att=()=>{
   const S=stats(),th=+st.settings.threshold||75,pct=S.pct,col=pct>=th+5?'var(--ok)':pct>=th?'var(--ac)':'var(--bad)',mo=+st.settings.monte||0;
   hdr('Altro','Presenze','+ Giorno',"editAtt(today())",true);
-  let h=`<section class="card"><div class="stat"><div class="big" style="color:${col}">${S.sch?pct.toFixed(0)+'%':'—'}</div><div><b>Frequenza</b><small>${dur(S.att)} frequentate su ${dur(S.sch)} · soglia ${th}%</small></div></div><div class="bar"><i style="width:${Math.min(100,S.sch?pct:0)}%;background:${col}"></i><u style="left:${th}%"></u></div>`;
+  let h=`<section class="card"><div class="stat"><div class="big" style="color:${col}">${S.sch?pct.toFixed(0)+'%':'—'}</div><div><b>Frequenza</b><small>${dur(S.att)} frequentate su ${dur(S.sch)} · soglia ${th}%</small>${S.just?`<small>Giustificate (malattia/permessi): <b>${dur(S.just)}</b> · al netto: <b>${S.pctNet.toFixed(0)}%</b></small>`:''}</div></div><div class="bar"><i style="width:${Math.min(100,S.sch?pct:0)}%;background:${col}"></i><u style="left:${th}%"></u></div>`;
   h+=`<div class="kpis"><div><b>${S.days}</b><small>giorni registrati</small></div><div><b>${S.abs}</b><small>assenze</small></div><div><b>${dur(S.sch-S.att)}</b><small>ore perse</small></div></div>`;
   if(mo){const allow=mo*60*(1-th/100),left=allow-(S.sch-S.att),fadMax=mo*60*(+st.settings.fadPct||20)/100;
     h+=`<div class="sub-h">Patto Formativo · ${mo} ore</div><div class="kpis"><div><b class="${left<allow*.25?'bad':''}">${dur(Math.max(0,left))}</b><small>assenze ancora possibili</small></div><div><b>${dur(mo*60*th/100)}</b><small>ore minime da frequentare</small></div><div><b>${dur(S.fad)}</b><small>FAD su max ${dur(fadMax)}</small></div></div>`;
@@ -1150,7 +1247,7 @@ function delAtt(d){if(!confirm('Eliminare la registrazione di '+fmtShort(d)+'?')
 VIEWS.more=()=>{
   hdr(st.settings.school,'Altro');
   const t=today(),open=st.tasks.filter(x=>!x.done).length,app=st.notes.filter(n=>n.type==='appt'&&n.date>=t).length,S=stats();
-  const T=[['att','✅','Presenze',S.sch?S.pct.toFixed(0)+'% frequenza':'check-in e assenze'],['tasks','📝','Compiti',open+' da fare'],['grades','📈','Voti e pagella',st.grades.length+' voti'],['journal','📓','Diario di bordo','riflessione settimanale'],['contacts','📇','Rubrica',st.contacts.length+' contatti'],['files','🗂️','Archivio','file, dispense, foto'],['notes','🗒️','Note e appuntamenti',app+' in arrivo'],['subjects','📚','Materie',st.subjects.length+' materie'],['shifts','🏭','Turni di lavoro',st.settings.shiftCycle.length?'rotazione attiva':'da impostare'],['settings','⚙️','Impostazioni','orari, AI, backup']];
+  const T=[['att','✅','Presenze',S.sch?S.pct.toFixed(0)+'% frequenza':'check-in e assenze'],['tasks','📝','Compiti',open+' da fare'],['grades','📈','Voti e pagella',st.grades.length+' voti'],['journal','📓','Diario di bordo','riflessione settimanale'],['contacts','📇','Rubrica',st.contacts.length+' contatti'],['files','🗂️','Archivio','file, dispense, foto'],['notes','🗒️','Note e appuntamenti',app+' in arrivo'],['subjects','📚','Materie',st.subjects.length+' materie'],['shifts','🏭','Turni di lavoro',st.settings.shiftCycle.length?'rotazione attiva':'da impostare'],['limits','🩺','Malattia e permessi',(st.limits||[]).some(l=>l.to>=today())?'attivo':'nessuno'],['scr','🏅','Scrutini',(st.scr||[]).length+' inseriti'],['classroom','🎓','Google Classroom',st.cr.synced?'sincronizzato':'da collegare'],['imp','✦','Importa smart','da registro, foto, testo'],['settings','⚙️','Impostazioni','orari, AI, backup']];
   let h=`<div class="tiles">${T.map(x=>`<button class="tile" onclick="sub('${x[0]}')"><span>${x[1]}</span><b>${x[2]}</b><small>${x[3]}</small></button>`).join('')}</div>`;
   h+=`<div class="tiles mt">${st.settings.registro?`<a class="tile" href="${esc(st.settings.registro)}" target="_blank" rel="noopener"><span>🏫</span><b>Registro elettronico</b><small>apri</small></a>`:`<button class="tile" onclick="sub('settings')"><span>🏫</span><b>Registro elettronico</b><small>imposta il link</small></button>`}<button class="tile" onclick="exportData(true)"><span>💾</span><b>Backup</b><small>${st.settings.lastBackup?'ultimo '+fmtShort(st.settings.lastBackup):'mai fatto'}</small></button></div>`;
   return h;
@@ -1161,7 +1258,7 @@ function taskRow(x){
   const s=subById(x.sub),t=today(),late=!x.done&&x.due&&x.due<t;
   return`<div class="task ${x.done?'done':''}"><button class="ck ${x.done?'on':''}" onclick="toggleTask('${x.id}')" aria-label="Fatto"></button><div class="grow" onclick="editTask('${x.id}')"><b>${esc(x.title)}</b><small>${s?`<span class="dot" style="background:${s.color}"></span>${esc(s.name)} ·`:''} ${esc(x.type)}${x.due?` · <span class="${late?'bad':''}">${x.due===t?'oggi':'per '+fmtShort(x.due)}</span>`:''}</small></div></div>`;
 }
-function toggleTask(id){const x=st.tasks.find(t=>t.id===id);if(!x)return;x.done=!x.done;save();render();if(x.done)toast('Fatto. Uno in meno.')}
+function toggleTask(id){const x=st.tasks.find(t=>t.id===id);if(!x)return;x.done=!x.done;if(x.done){const s=subById(x.sub);logEv('task',{sk:s?subjKeyOf(s):'',late:!!(x.due&&x.due<today()),type:x.type});if(x.topic&&s)exposure(subjKeyOf(s),x.topic,'compito')}save();render();if(x.done)toast('Fatto. Uno in meno.')}
 VIEWS.tasks=()=>{
   const t=today(),open=st.tasks.filter(x=>!x.done);
   hdr('Altro','Compiti','+ Nuovo','editTask()',true);
@@ -1370,6 +1467,129 @@ function editShiftDay(d){
 }
 function setShiftDay(d,v){if(v===null)delete st.shifts[d];else st.shifts[d]=v;save();closeSheet();render()}
 
+/* ============ MOTORE DI AUTOAPPRENDIMENTO ============ */
+const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+const STOP=new Set(['della','delle','degli','dello','nella','nelle','sulla','sulle','sono','come','anche','cosa','base','il','lo','la','le','gli','di','da','in','con','su','per','tra','fra','e','ed','o','un','una','uno','del','dei','al','ai','alla','alle','dal','dalla','non','che']);
+const toks=s=>norm(s).split(' ').filter(w=>w.length>3&&!STOP.has(w)).map(w=>w.slice(0,6));
+function topicSim(a,b){const A=toks(a),B=toks(b);if(!A.length||!B.length)return 0;const s=new Set(B);const inter=A.filter(x=>s.has(x)).length;return inter/Math.min(A.length,B.length)}
+const subjKeyOf=s=>s?(libOf(s)||norm(s.name)):'generale';
+const subjKeyByName=n=>libKeyFor(n)||norm(n);
+function logEv(k,o){st.ev=st.ev||[];st.ev.push(Object.assign({t:Date.now(),d:today(),k},o||{}));if(st.ev.length>2500)st.ev=st.ev.slice(-2000)}
+/* padronanza: media mobile esponenziale 0..1 per argomento */
+function tKey(sk,topic){return sk+'|'+norm(topic).slice(0,60)}
+function findTopicKey(sk,topic){const k=tKey(sk,topic);if(st.mast[k])return k;let best=null,bs=0;for(const x in st.mast){if(!x.startsWith(sk+'|'))continue;const s=topicSim(x.split('|')[1],topic);if(s>bs){bs=s;best=x}}return bs>=.6?best:k}
+function learn(sk,topic,outcome,w=.3,src='quiz'){
+  if(!topic)topic='generale';const k=findTopicKey(sk,topic);const e=st.mast[k]||{m:.5,n:0,t:topic,last:'',src:{}};
+  e.m=Math.max(0,Math.min(1,e.m+w*(outcome-e.m)));e.n++;e.last=today();e.t=e.t||topic;e.src[src]=(e.src[src]||0)+1;st.mast[k]=e;
+  logEv('learn',{sk,topic,o:outcome,src});
+}
+function exposure(sk,topic,src){if(!topic)return;const k=findTopicKey(sk,topic);const e=st.mast[k]||{m:.5,n:0,t:topic,last:'',src:{}};e.seen=(e.seen||0)+1;e.last=today();e.src[src]=(e.src[src]||0)+1;st.mast[k]=e;logEv('seen',{sk,topic,src})}
+function subjMastery(sk){const L=Object.entries(st.mast).filter(([k,e])=>k.startsWith(sk+'|')&&e.n>0);const G=st.grades.filter(g=>subjKeyOf(subById(g.sub))===sk);
+  let num=0,den=0;L.forEach(([k,e])=>{const w=Math.min(e.n,5);num+=e.m*w;den+=w});
+  if(G.length){const a=gradeAvg(G);num+=Math.max(0,Math.min(1,(a-4)/6))*6;den+=6}
+  return den?num/den:null}
+function weakTopics(n=6){
+  const L=Object.entries(st.mast).filter(([k,e])=>e.n>=2&&e.m<.6).map(([k,e])=>({k,sk:k.split('|')[0],t:e.t,m:e.m,why:'risultati'}));
+  (st.doubts||[]).filter(x=>!x.solved).forEach(x=>{if(!L.some(y=>topicSim(y.t,x.t)>=.6))L.push({k:x.sk+'|'+norm(x.t),sk:x.sk,t:x.t,m:.3,why:'dubbio'})});
+  return L.sort((a,b)=>a.m-b.m).slice(0,n)}
+function strongTopics(n=5){return Object.entries(st.mast).filter(([k,e])=>e.n>=3&&e.m>=.8).map(([k,e])=>({sk:k.split('|')[0],t:e.t,m:e.m})).sort((a,b)=>b.m-a.m).slice(0,n)}
+const LVL=['','base','intermedio','avanzato'];
+const lvlOf=sk=>st.lvl[sk]||1;
+function aiFeedback(sk,topic,kind){
+  const l=lvlOf(sk);
+  if(kind==='hard'){st.lvl[sk]=Math.max(1,l-1);learn(sk,topic,.3,.15,'feedback');st.prefs.simpler=(st.prefs.simpler||0)+1;toast('Ok: spiegazioni più semplici per '+skName(sk))}
+  else if(kind==='easy'){st.lvl[sk]=Math.min(3,l+1);learn(sk,topic,.85,.15,'feedback');toast('Ok: alzo il livello per '+skName(sk))}
+  else{learn(sk,topic,.7,.1,'feedback');toast('Registrato 👍')}
+  logEv('fb',{sk,topic,kind});save();
+  document.querySelectorAll('.fbbar').forEach(b=>b.innerHTML='<span class="muted">Grazie: me lo ricordo.</span>');
+}
+const fbBar=(sk,topic)=>`<div class="fbbar"><span class="muted">Com'era?</span><button class="btn sm" onclick="aiFeedback('${sk}','${jsq(topic)}','ok')">👍 Chiaro</button><button class="btn sm" onclick="aiFeedback('${sk}','${jsq(topic)}','hard')">Troppo difficile</button><button class="btn sm" onclick="aiFeedback('${sk}','${jsq(topic)}','easy')">Troppo facile</button></div>`;
+function skName(sk){if(LIB[sk])return LIB[sk].name;const s=st.subjects.find(x=>subjKeyOf(x)===sk);return s?s.name:sk}
+/* dubbi dal diario di bordo e dalle note */
+function extractDoubts(text,srcDate){
+  if(!text)return 0;let n=0;const cands=[];
+  for(const y of [1,2,3])for(const[sn,L]of Object.entries(sylFor(y)))L.forEach(t=>cands.push({sk:subjKeyByName(sn),t}));
+  for(const k in LIB)LIB[k].topics.forEach(tp=>cands.push({sk:k,t:tp.t,kw:tp.k}));
+  const low=norm(text);
+  cands.forEach(c=>{const kh=c.kw?c.kw.filter(w=>w.length>4&&low.includes(norm(w))).length:0;const hit=topicSim(text,c.t)>=.5||kh>=2;if(hit&&!(st.doubts||[]).some(d=>d.sk===c.sk&&topicSim(d.t,c.t)>=.8)){st.doubts.push({sk:c.sk,t:c.t,d:srcDate||today(),solved:false});n++}});
+  return n}
+/* contesto per l'AI */
+function learnerContext(short){
+  const g=st.goal||{},W=weakTopics(5),S=strongTopics(4);
+  const levels=[...new Set(st.subjects.filter(s=>!s.credit).map(subjKeyOf))].map(sk=>skName(sk)+': '+LVL[lvlOf(sk)]).join('; ');
+  let t=`Anno attuale: ${st.settings.curYear||1}° anno (primo periodo del serale). Obiettivo: esami integrativi per passare al ${g.year||2}° anno${g.date?' entro il '+fmtDate(g.date):''}.`;
+  if(W.length)t+=` Punti deboli: ${W.map(x=>x.t+' ('+skName(x.sk)+')').join(', ')}.`;
+  if(!short){t+=` Livello di spiegazione per materia: ${levels}.`;if(S.length)t+=` Punti forti: ${S.map(x=>x.t).join(', ')}.`;if(st.prefs.simpler>=2)t+=' Preferisce spiegazioni molto semplici e passo passo.';if(st.learned)t+=' Profilo appreso: '+st.learned}
+  return t}
+
+/* ============ PROGRAMMI E PERCORSO ============ */
+function sylFor(y){const base=SYL[y]||{},out={};for(const sn in base){const del=st.sylDel[y+'|'+sn]||[];out[sn]=base[sn].filter(t=>!del.includes(t)).concat(st.sylAdd[y+'|'+sn]||[])}for(const k in st.sylAdd){const[yy,sn]=k.split('|');if(+yy===y&&!out[sn])out[sn]=st.sylAdd[k]}return out}
+const sKey=(y,sn,t)=>y+'|'+sn+'|'+t;
+let _dtC=null;
+function diaryTopics(){if(_dtC&&_dtC.v===_ver)return _dtC.L;const L=[];for(const d of Object.keys(st.diary))for(const l of lessonsFor(d))if(l.topic&&l.sub)L.push({sk:subjKeyOf(l.sub),t:l.topic});(st.ext||[]).forEach(x=>L.push({sk:x.sk,t:x.t}));_dtC={v:_ver,L};return L}
+function autoStatus(y,sn,t){
+  const sk=subjKeyByName(sn);let st_=0;
+  if(diaryTopics().some(x=>x.sk===sk&&topicSim(x.t,t)>=.5))st_=1;
+  const k=findTopicKey(sk,t),e=st.mast[k];
+  if(e){if(e.seen||e.n)st_=Math.max(st_,1);if(e.n>=2&&e.m>=.6)st_=2;if(e.n>=3&&e.m>=.8)st_=3}
+  return st_}
+const topicStatus=(y,sn,t)=>st.sylSt[sKey(y,sn,t)]!==undefined?st.sylSt[sKey(y,sn,t)]:autoStatus(y,sn,t);
+const STLBL=['da fare','affrontato','studiato','padroneggiato'],STCOL=['var(--line)','#6fa8dc','var(--ac)','var(--ok)'];
+function yearProgress(y){let tot=0,sum=0;const S=sylFor(y);for(const sn in S)for(const t of S[sn]){tot++;sum+=topicStatus(y,sn,t)}return{tot,pct:tot?sum/(tot*3)*100:0,done:Object.entries(S).reduce((a,[sn,L])=>a+L.filter(t=>topicStatus(y,sn,t)>=2).length,0)}}
+function pace(){const g=st.goal||{},cy=+st.settings.curYear||1,ty=+g.year||2;let left=0;for(let y=cy;y<ty;y++){const S=sylFor(y);for(const sn in S)for(const t of S[sn])if(topicStatus(y,sn,t)<2)left++}
+  const wk=g.date?Math.max(1,Math.ceil(daysBetween(today(),g.date)/7)):null;return{left,wk,perWeek:wk?Math.ceil(left/wk):null}}
+VIEWS.path=()=>{
+  hdr('Studio','Il mio percorso','','',true);const g=st.goal,cy=+st.settings.curYear||1,ty=+g.year||2,P=pace();
+  let h=`<section class="card"><div class="card-h"><h3>Obiettivo</h3></div>
+  <div class="f2">${fld('Anno attuale',`<select onchange="st.settings.curYear=+this.value;save();render()">${[1,2,3,4].map(y=>`<option value="${y}" ${cy===y?'selected':''}>${y}° anno</option>`).join('')}</select>`)}${fld('Voglio passare al',`<select onchange="st.goal.year=+this.value;save();render()">${[2,3,4,5].filter(y=>y>cy).map(y=>`<option value="${y}" ${ty===y?'selected':''}>${y}° anno</option>`).join('')}</select>`)}</div>
+  ${fld('Data prevista esami integrativi',`<input type="date" value="${esc(g.date||'')}" onchange="st.goal.date=this.value;save();render()">`)}
+  ${P.wk?`<div class="kpis"><div><b>${P.left}</b><small>argomenti da studiare</small></div><div><b>${P.wk}</b><small>settimane</small></div><div><b>${P.perWeek}</b><small>a settimana</small></div></div>`:`<p class="hint">Inserisci la data degli esami integrativi: calcolo quanti argomenti a settimana servono.</p>`}
+  <div class="row mt"><button class="btn pri sm" onclick="weekPlan()">🗓 Piano di questa settimana</button><button class="btn sm" onclick="openV('me',null,'study')">Cosa ho capito di te</button></div>
+  <p class="hint">Programmi indicativi dalle linee guida nazionali (Meccanica e Meccatronica). Chiedi in segreteria il programma ufficiale degli esami integrativi e correggi qui gli argomenti.</p></section>`;
+  for(let y=1;y<=Math.max(ty-1,cy);y++){if(!SYL[y])continue;const YP=yearProgress(y),S=sylFor(y);
+    h+=`<section class="card"><div class="card-h"><h3>${y}° anno ${y<cy?'· già frequentato':y===cy?'· in corso':'· da recuperare'}</h3><span class="muted">${YP.done}/${YP.tot}</span></div><div class="bar"><i style="width:${YP.pct}%;background:var(--ac)"></i></div>
+    ${Object.entries(S).map(([sn,L])=>{const sp=L.length?L.reduce((a,t)=>a+topicStatus(y,sn,t),0)/(L.length*3)*100:0;return`<details class="det"><summary><span class="grow"><b>${esc(sn)}</b> <small class="muted">${Math.round(sp)}%</small></span></summary><div class="minibar"><i style="width:${sp}%"></i></div>${L.map(t=>{const s=topicStatus(y,sn,t),man=st.sylSt[sKey(y,sn,t)]!==undefined;return`<div class="frow"><button class="stbtn" style="border-color:${STCOL[s]};color:${STCOL[s]}" onclick="cycleSt(${y},'${jsq(sn)}','${jsq(t)}')">${STLBL[s]}${man?'':' ·auto'}</button><span class="grow" style="font-size:14px">${esc(t)}</span><button class="ib sm" onclick="openTopic(subjIdByName('${jsq(sn)}'),'${jsq(t)}','${subjKeyByName(sn)}')">📚</button></div>`}).join('')}<div class="row mt"><button class="btn sm" onclick="addSylTopic(${y},'${jsq(sn)}')">+ Argomento</button></div></details>`}).join('')}</section>`}
+  return h;
+};
+function subjIdByName(sn){const sk=subjKeyByName(sn);const s=st.subjects.find(x=>subjKeyOf(x)===sk);return s?s.id:''}
+function cycleSt(y,sn,t){const k=sKey(y,sn,t),cur=topicStatus(y,sn,t),nx=(cur+1)%4;if(st.sylSt[k]!==undefined&&nx===autoStatus(y,sn,t))delete st.sylSt[k];else st.sylSt[k]=nx;if(nx===3)learn(subjKeyByName(sn),t,.9,.2,'manuale');save();render()}
+function addSylTopic(y,sn){const t=prompt('Nuovo argomento di '+sn+' ('+y+'° anno):');if(!t)return;const k=y+'|'+sn;(st.sylAdd[k]=st.sylAdd[k]||[]).push(t.trim());save();render()}
+function weekPlan(){
+  const cy=+st.settings.curYear||1,ty=+(st.goal.year||2),P=pace(),n=Math.max(3,Math.min(8,P.perWeek||4));
+  const W=weakTopics(10),cands=[];
+  W.forEach(w=>cands.push({sn:skName(w.sk),t:w.t,why:'punto debole'}));
+  for(let y=cy;y<ty;y++){const S=sylFor(y);for(const sn in S)for(const t of S[sn])if(topicStatus(y,sn,t)<2&&!cands.some(c=>c.t===t))cands.push({sn,t,why:y+'° anno'})}
+  if(!cands.length){toast('Niente da pianificare: sei in pari!');return}
+  const pick=cands.slice(0,n),days=[];for(let i=0;i<7&&days.length<7;i++){const d=addD(today(),i);const cf=shiftConflict(d);if(!(cf&&cf.all))days.push(d)}
+  st.tasks=st.tasks.filter(t=>!(t.weekPlan===monday(today())&&!t.done));
+  pick.forEach((c,i)=>{const sid=subjIdByName(c.sn);st.tasks.push({id:uid(),title:'Studio: '+c.t,type:'Studio',sub:sid,assigned:today(),due:days[i%days.length],desc:'Piano settimanale ('+c.why+'). Apri la scheda, studia, poi fai quiz o flashcard.',done:false,weekPlan:monday(today()),topic:c.t})});
+  logEv('plan',{n:pick.length});save();render();toast(pick.length+' sessioni di studio pianificate');
+}
+/* ============ COSA HO CAPITO DI TE ============ */
+VIEWS.me=()=>{
+  hdr('Studio','Cosa ho capito di te','','',true);
+  const sks=[...new Set(st.subjects.filter(s=>!s.credit).map(subjKeyOf))];
+  const W=weakTopics(8),S=strongTopics(6),ev=st.ev||[],wk=ev.filter(e=>daysBetween(e.d,today())<7);
+  let h=`<section class="card"><p style="margin:0">L'app osserva quiz, flashcard, voti, ricerche, compiti, diario di bordo e i tuoi "chiaro / troppo difficile". Da questo stima cosa sai, dove inciampi e a che livello spiegarti le cose. Tutto resta sul telefono.</p><div class="kpis mt"><div><b>${wk.filter(e=>e.k==='learn').length}</b><small>risposte questa sett.</small></div><div><b>${Object.keys(st.mast).length}</b><small>argomenti tracciati</small></div><div><b>${(st.doubts||[]).filter(d=>!d.solved).length}</b><small>dubbi aperti</small></div></div></section>`;
+  h+=`<section class="card"><div class="card-h"><h3>Materie</h3></div>${sks.map(sk=>{const m=subjMastery(sk);return`<div class="frow"><div class="grow"><b style="font-size:14px">${esc(skName(sk))}</b><div class="minibar"><i style="width:${m==null?0:m*100}%;background:${m==null?'var(--line)':m>=.7?'var(--ok)':m>=.5?'var(--ac)':'var(--bad)'}"></i></div></div><select class="lvsel" onchange="st.lvl['${sk}']=+this.value;save()">${[1,2,3].map(l=>`<option value="${l}" ${lvlOf(sk)===l?'selected':''}>${LVL[l]}</option>`).join('')}</select></div>`}).join('')}<p class="hint">Il livello cambia da solo con i tuoi feedback. Puoi anche forzarlo qui.</p></section>`;
+  h+=`<section class="card"><div class="card-h"><h3>Da rinforzare</h3></div>${W.length?W.map(w=>`<div class="frow"><span class="grow" style="font-size:14px"><b>${esc(w.t)}</b><br><small class="muted">${esc(skName(w.sk))} · ${w.why==='dubbio'?'segnato come dubbio':'padronanza '+Math.round(w.m*100)+'%'}</small></span><button class="btn sm" onclick="openTopic(subjIdByName('${jsq(skName(w.sk))}'),'${jsq(w.t)}','${w.sk}')">Studia</button>${w.why==='dubbio'?`<button class="ib sm" onclick="solveDoubt('${jsq(w.t)}')">✓</button>`:''}</div>`).join(''):'<p class="empty-s">Ancora pochi dati. Fai qualche quiz e ripassa le flashcard.</p>'}</section>`;
+  if(S.length)h+=`<section class="card"><div class="card-h"><h3>Punti forti</h3></div><div class="chips">${S.map(s=>`<span class="chip">✓ ${esc(s.t)}</span>`).join('')}</div></section>`;
+  h+=`<section class="card"><div class="card-h"><h3>Profilo appreso</h3>${hasGem()?'<button class="btn sm" onclick="learnProfileAI()">✦ Aggiorna con AI</button>':''}</div><textarea class="inp" rows="4" onchange="st.learned=this.value.trim();save()" placeholder="Qui l'AI (o tu) scrive come impari meglio: es. ‘capisco meglio con esempi d\\'officina, faccio fatica con l\\'algebra astratta’">${esc(st.learned||'')}</textarea><p class="hint">Viene letto dal tutor, da Gemini e da Claude a ogni domanda.</p></section>`;
+  h+=`<section class="card"><div class="card-h"><h3>Contesto inviato all'AI</h3></div><p class="muted" style="margin:0;font-size:12.5px">${esc(learnerContext())}</p></section>`;
+  return h;
+};
+function solveDoubt(t){const d=(st.doubts||[]).find(x=>x.t===t&&!x.solved);if(d){d.solved=true;save();render();toast('Dubbio risolto')}}
+async function learnProfileAI(){
+  const J=Object.entries(st.journal).slice(-6).map(([m,j])=>`Settimana ${m}: capito: ${j.a}; non chiaro: ${j.b}; piano: ${j.c}`).join('\n');
+  const stats=[...new Set(st.subjects.map(subjKeyOf))].map(sk=>{const m=subjMastery(sk);return skName(sk)+': '+(m==null?'n.d.':Math.round(m*100)+'%')}).join(', ');
+  const fb=(st.ev||[]).filter(e=>e.k==='fb').slice(-30).map(e=>e.kind+' su '+e.topic).join('; ');
+  try{toast('Gemini analizza…');const t=await gemini(`Dati dello studente.\nDiario di bordo:\n${J||'—'}\nPadronanza per materia: ${stats}\nFeedback sulle spiegazioni: ${fb||'—'}\nPunti deboli: ${weakTopics(8).map(w=>w.t).join(', ')||'—'}\n\nScrivi in 4-5 righe, in terza persona, un profilo di apprendimento operativo: come impara meglio, dove fatica, che livello di spiegazione serve, cosa priorizzare per gli esami integrativi. Niente preamboli.`);st.learned=t.trim();save();render();toast('Profilo aggiornato')}catch(e){toast(e.message)}
+}
+/* argomenti "capiti" dal diario di bordo: piccolo rinforzo positivo */
+function extractGot(text){if(!text)return 0;let n=0;const low=norm(text),seen=new Set();
+  for(const k in LIB)LIB[k].topics.forEach(tp=>{if(seen.has(k+tp.t))return;if(topicSim(text,tp.t)>=.5||tp.k.filter(w=>w.length>4&&low.includes(norm(w))).length>=2){seen.add(k+tp.t);learn(k,tp.t,.75,.15,'diario');n++}});
+  return n}
+
 /* ============ STUDIO: VISTA PRINCIPALE ============ */
 VIEWS.study=()=>{
   hdr('Studio','Il tuo supporto allo studio');
@@ -1378,6 +1598,7 @@ VIEWS.study=()=>{
     <div class="inrow"><input class="inp" id="q_topic" placeholder="es. proiezioni ortogonali, legge di Ohm…" onkeydown="if(event.key==='Enter')goTopic()">${micBtn('q_topic')}</div>
     <div class="row mt"><select class="inp grow" id="q_sub">${subOpts('')}</select><button class="btn pri" onclick="goTopic()">Vai</button></div>
     ${rt.length?`<div class="sub-h">Dalle tue lezioni</div><div class="chips">${rt.map(x=>`<span class="chip act" onclick="openTopic('${x.sub.id}','${jsq(x.topic)}')"><span class="dot" style="background:${x.sub.color}"></span> ${esc(x.topic)}</span>`).join('')}</div>`:'<p class="hint">Scrivi l\'argomento nelle lezioni del Diario: comparirà qui, pronto da studiare.</p>'}</section>`;
+  h+=pathCard();
   h+=`<section class="card"><div class="card-h"><h3>Flashcard</h3><span class="muted">${tot} carte</span></div>
     <div class="qgrid"><button class="qb" onclick="startReview()"><b>${due}</b><small>da ripassare oggi</small></button><button class="qb" onclick="quickQuiz()"><b>✔︎</b><small>quiz rapido</small></button><button class="qb" onclick="openV('cards',null,'study')"><b>🗂</b><small>mazzi</small></button><button class="qb" onclick="editCard()"><b>+</b><small>nuova carta</small></button></div>
     <p class="hint">Ripetizione dilazionata: ogni carta torna quando stai per dimenticarla. 10 minuti al giorno battono 3 ore la sera prima.</p></section>`;
@@ -1389,7 +1610,8 @@ VIEWS.study=()=>{
 function goTopic(){const t=val('q_topic');if(!t){toast('Scrivi un argomento');return}let s=val('q_sub');
   if(!s){let best=null,sc=0;for(const x of st.subjects){const k=libOf(x);if(!k)continue;const m=matchTopics(k,t).length;if(m>sc){sc=m;best=x}}if(best)s=best.id}
   openTopic(s,t)}
-function openTopic(sid,topic,lk){openV('topic',{sid,topic,lk},'study')}
+function openTopic(sid,topic,lk){const s=subById(sid);exposure(s?subjKeyOf(s):(lk||'generale'),topic,'ricerca');save();openV('topic',{sid,topic,lk},'study')}
+const topicSk=()=>{const p=ui.p||{},s=subById(p.sid);return s?subjKeyOf(s):(p.lk||'generale')};
 
 /* ============ SCHEDA ARGOMENTO ============ */
 VIEWS.topic=p=>{
@@ -1429,7 +1651,8 @@ function topicPrompt(mode){
   const p=ui.p||{},s=subById(p.sid),sn=s?s.name:(p.lk?LIB[p.lk].name:''),T=p.topic;
   const last=[];for(const d of Object.keys(st.diary).sort().reverse())for(const l of lessonsFor(d))if(l.topic&&l.topic.toLowerCase()===String(T).toLowerCase()&&l.note)last.push(l.note);
   const notes=last.length?'\nI miei appunti della lezione: '+last[0].slice(0,500):'';
-  const base=`Materia: ${sn||'—'}. Argomento della lezione: "${T}".${notes}\n`;
+  const sk0=s?subjKeyOf(s):(p.lk||'generale'),e0=st.mast[findTopicKey(sk0,T)];
+  const base=`Materia: ${sn||'—'}. Argomento della lezione: "${T}".${notes}\nLivello di spiegazione richiesto: ${LVL[lvlOf(sk0)]}.${e0&&e0.n?' Padronanza stimata di questo argomento: '+Math.round(e0.m*100)+'%.':''}\n`;
   if(mode==='explain')return base+'Spiegamelo da zero, in modo chiaro e concreto: concetti chiave, formule con unità di misura (se ci sono), un esempio pratico preso dall\'officina o dalla vita reale, errori tipici da evitare. Chiudi con 3 domande per verificare se ho capito.';
   if(mode==='exercises')return base+'Proponimi 4 esercizi graduati (dal più facile al più difficile) su questo argomento, del livello del primo periodo di un istituto tecnico serale. Metti le soluzioni svolte passo passo alla fine, separate.';
   return base;
@@ -1440,9 +1663,9 @@ async function topicAI(mode){
   out.innerHTML='<p class="muted"><span class="spin"></span> Gemini sta scrivendo…</p>';
   try{
     if(mode==='cards'){const L=await gemini(topicPrompt('base')+'Crea 8 flashcard efficaci (domanda breve / risposta essenziale, formule con unità) su questo argomento. Rispondi SOLO con JSON: [{"front":"…","back":"…"}]',{json:true});showCardPreview(L,p.sid,out);return}
-    if(mode==='quiz'){const L=await gemini(topicPrompt('base')+'Crea un quiz di 5 domande a risposta multipla (4 opzioni, una sola corretta, distrattori plausibili) su questo argomento. Rispondi SOLO con JSON: [{"q":"…","options":["…","…","…","…"],"answer":0,"why":"spiegazione breve"}]',{json:true});startQuizItems(normQuiz(L),p.sid);return}
+    if(mode==='quiz'){const L=await gemini(topicPrompt('base')+'Crea un quiz di 5 domande a risposta multipla (4 opzioni, una sola corretta, distrattori plausibili) su questo argomento. Rispondi SOLO con JSON: [{"q":"…","options":["…","…","…","…"],"answer":0,"why":"spiegazione breve"}]',{json:true});const QI=normQuiz(L);QI.forEach(x=>x.topic=p.topic);startQuizItems(QI,p.sid);qz.topic=p.topic;qz.lk=p.lk;return}
     const txt=await gemini(topicPrompt(mode));
-    out.innerHTML=md(txt)+`<div class="row mt"><button class="btn sm" onclick="saveAIasNote()">Salva nelle note</button><button class="btn sm" onclick="askClaude(topicPrompt('${mode}'))">Approfondisci in Claude</button></div>`;
+    out.innerHTML=md(txt)+fbBar(topicSk(),p.topic)+`<div class="row mt"><button class="btn sm" onclick="saveAIasNote()">Salva nelle note</button><button class="btn sm" onclick="askClaude(topicPrompt('${mode}'))">Approfondisci in Claude</button></div>`;
     out._txt=txt;
   }catch(e){out.innerHTML=`<p class="bad">${esc(e.message)}</p><button class="btn sm" onclick="askClaude(topicPrompt('${mode==='exercises'?'exercises':'explain'}'))">Apri in Claude</button>`}
 }
@@ -1451,10 +1674,10 @@ function normQuiz(L){return(Array.isArray(L)?L:(L.questions||L.quiz||[])).filter
 function showCardPreview(L,sid,out){
   L=(Array.isArray(L)?L:(L.cards||L.flashcards||[])).filter(x=>x&&x.front&&x.back);
   if(!L.length){out.innerHTML='<p class="bad">Nessuna flashcard generata. Riprova.</p>';return}
-  window._pv={L,sid};
+  window._pv={L,sid,topic:(ui.p&&ui.p.topic)||''};
   out.innerHTML=`<div class="sub-h" style="margin-top:0">Flashcard proposte</div>${L.map((c,i)=>`<button class="chk on pv" data-i="${i}" onclick="this.classList.toggle('on')"><i></i><span><b>${esc(c.front)}</b><br><small>${esc(c.back)}</small></span></button>`).join('')}<div class="row mt"><select class="inp grow" id="pv_sub">${subOpts(sid||'')}</select><button class="btn pri" onclick="addPreviewCards()">Aggiungi selezionate</button></div>`;
 }
-function addPreviewCards(){const P=window._pv;if(!P)return;const s=val('pv_sub');let n=0;document.querySelectorAll('.pv.on').forEach(b=>{const c=P.L[+b.dataset.i];st.cards.push(newCard(s,c.front,c.back));n++});save();toast(n+' flashcard aggiunte');const o=$('#ai_out')||$('#ph_out');if(o)o.innerHTML=`<p class="ok">✓ ${n} flashcard nel mazzo.</p><button class="btn sm" onclick="closeSheet();startReview()">Ripassale ora</button>`}
+function addPreviewCards(){const P=window._pv;if(!P)return;const s=val('pv_sub');let n=0;document.querySelectorAll('.pv.on').forEach(b=>{const c=P.L[+b.dataset.i];st.cards.push(newCard(s,c.front,c.back,P.topic||''));n++});save();toast(n+' flashcard aggiunte');const o=$('#ai_out')||$('#ph_out');if(o)o.innerHTML=`<p class="ok">✓ ${n} flashcard nel mazzo.</p><button class="btn sm" onclick="closeSheet();startReview()">Ripassale ora</button>`}
 async function photoAI(id,mode){
   const out=$('#ph_out');if(!hasGem()){out.innerHTML=`<p class="muted">Questa funzione usa Gemini (legge le immagini). Collega la chiave in Impostazioni.</p><button class="btn sm" onclick="closeSheet();sub('settings')">Impostazioni</button>`;return}
   out.innerHTML='<p class="muted"><span class="spin"></span> Gemini sta leggendo la foto…</p>';
@@ -1500,9 +1723,9 @@ function formulaList(q){q=q.toLowerCase().trim();let h='';
   return h||'<section class="card"><p class="empty-s">Nessuna formula trovata.</p></section>'}
 
 /* ============ FLASHCARD (ripetizione dilazionata SM-2) ============ */
-const newCard=(sub,front,back)=>({id:uid(),sub:sub||'',front,back,due:today(),ivl:0,ef:2.5,reps:0,lapses:0,created:today()});
+const newCard=(sub,front,back,topic)=>({id:uid(),sub:sub||'',topic:topic||'',front,back,due:today(),ivl:0,ef:2.5,reps:0,lapses:0,created:today()});
 const cardsDue=(sid)=>st.cards.filter(c=>c.due<=today()&&(!sid||c.sub===sid));
-function quickCard(front,back,sid){st.cards.push(newCard(sid,front,back));save();toast('Flashcard aggiunta')}
+function quickCard(front,back,sid){st.cards.push(newCard(sid,front,back,front));save();toast('Flashcard aggiunta')}
 function editCard(id,sid){
   const c=id?st.cards.find(x=>x.id===id):{front:'',back:'',sub:sid||''};if(!c)return;
   sheet(id?'Modifica flashcard':'Nuova flashcard',`<label class="f"><span>Fronte (domanda)</span><div class="inrow top"><textarea id="cd_f" rows="2">${esc(c.front)}</textarea>${micBtn('cd_f')}</div></label><label class="f"><span>Retro (risposta)</span><div class="inrow top"><textarea id="cd_b" rows="3">${esc(c.back)}</textarea>${micBtn('cd_b')}</div></label>`+fld('Materia',`<select id="cd_s">${subOpts(c.sub)}</select>`)+(id?`<p class="hint">Ripetizioni: ${c.reps} · intervallo ${c.ivl} g · prossima ${fmtShort(c.due)}</p>`:''),
@@ -1534,14 +1757,14 @@ function schedule(c,q){
   else{c.ivl=c.reps===0?3:Math.round(Math.max(c.ivl,1)*c.ef*1.3);c.ef+=.15;c.reps++}
   c.due=addD(today(),c.ivl);return c;
 }
-function rateCard(q){const c=rv.q.shift();const real=st.cards.find(x=>x.id===c.id);if(real)schedule(real,q);if(q===0)rv.q.push(real||c);else rv.done++;rv.show=false;save();render();vibrate(15)}
+function rateCard(q){const c=rv.q.shift();const real=st.cards.find(x=>x.id===c.id);if(real)schedule(real,q);{const cs=subById(c.sub);learn(cs?subjKeyOf(cs):'generale',c.topic||c.front.slice(0,50),[0,.6,.85,1][q],.2,'flashcard')}if(q===0)rv.q.push(real||c);else rv.done++;rv.show=false;save();render();vibrate(15)}
 /* ---- quiz ---- */
 let qz=null;
 function quickQuiz(sid){
   let pool=st.cards.filter(c=>!sid||c.sub===sid);
   if(pool.length<4){if(hasGem()){toast('Servono almeno 4 flashcard: uso l\'AI su un argomento');openV('study',null,'study')}else toast('Servono almeno 4 flashcard per il quiz');return}
-  const pick=pool.slice().sort((a,b)=>(a.due<b.due?-1:1)||Math.random()-.5).slice(0,Math.min(5,pool.length));
-  const items=pick.map(c=>{const same=pool.filter(x=>x.id!==c.id&&x.back!==c.back);const others=(same.length>=3?same:st.cards.filter(x=>x.id!==c.id&&x.back!==c.back)).sort(()=>Math.random()-.5).slice(0,3).map(x=>x.back);const o=[c.back,...others].sort(()=>Math.random()-.5);return{q:c.front,opts:o,ans:o.indexOf(c.back),why:'',cardId:c.id}});
+  const wS=c=>{const s=subById(c.sub),sk=s?subjKeyOf(s):'generale',e=st.mast[findTopicKey(sk,c.topic||c.front.slice(0,50))];const m=e?e.m:(subjMastery(sk)??.5);return m+(c.due<=today()?-.3:0)+Math.random()*.25};const pick=pool.slice().sort((a,b)=>wS(a)-wS(b)).slice(0,Math.min(5,pool.length));
+  const items=pick.map(c=>{const same=pool.filter(x=>x.id!==c.id&&x.back!==c.back);const others=(same.length>=3?same:st.cards.filter(x=>x.id!==c.id&&x.back!==c.back)).sort(()=>Math.random()-.5).slice(0,3).map(x=>x.back);const o=[c.back,...others].sort(()=>Math.random()-.5);return{q:c.front,opts:o,ans:o.indexOf(c.back),why:'',cardId:c.id,topic:c.topic||c.front.slice(0,50)}});
   startQuizItems(items,sid);
 }
 function startQuizItems(items,sid){if(!items.length){toast('Quiz vuoto, riprova');return}qz={items,i:0,score:0,picked:null,sid};openV('quiz',null,'study')}
@@ -1554,7 +1777,7 @@ VIEWS.quiz=()=>{
   <div class="opts">${it.opts.map((o,k)=>{let cls='';if(qz.picked!==null){if(k===it.ans)cls='ok';else if(k===qz.picked)cls='ko'}return`<button class="opt ${cls}" ${qz.picked!==null?'disabled':''} onclick="pickOpt(${k})">${esc(o)}</button>`}).join('')}</div>
   ${qz.picked!==null?`${it.why?`<p class="hint">${esc(it.why)}</p>`:''}<button class="btn pri wide mt" onclick="qz.i++;qz.picked=null;render()">${qz.i+1<qz.items.length?'Avanti':'Risultato'}</button>`:''}`;
 };
-function pickOpt(k){const it=qz.items[qz.i];qz.picked=k;if(k===it.ans){qz.score++;vibrate(15)}else{vibrate([30,40,30]);if(it.cardId){const c=st.cards.find(x=>x.id===it.cardId);if(c){c.due=today();save()}}}render()}
+function pickOpt(k){const it=qz.items[qz.i];qz.picked=k;{const qs=subById(qz.sid||(it.cardId&&(st.cards.find(x=>x.id===it.cardId)||{}).sub));learn(qs?subjKeyOf(qs):(qz.lk||'generale'),it.topic||qz.topic||it.q.slice(0,50),k===it.ans?1:0,.3,'quiz');save()}if(k===it.ans){qz.score++;vibrate(15)}else{vibrate([30,40,30]);if(it.cardId){const c=st.cards.find(x=>x.id===it.cardId);if(c){c.due=today();save()}}}render()}
 
 /* ============ TIMER STUDIO (pomodoro) ============ */
 function weekStudyMin(){const m=monday(today());const by={};let tot=0;st.pomos.filter(p=>p.date>=m).forEach(p=>{tot+=p.min;const s=subById(p.sub);const k=s?s.name:'Generale';by[k]=(by[k]||0)+p.min});return{tot,by:Object.entries(by).sort((a,b)=>b[1]-a[1])}}
@@ -1590,11 +1813,12 @@ VIEWS.tutor=()=>{
   hdr('Studio','Tutor','','',true);st.chat=st.chat||[];
   const t=today(),L=lessonsFor(nextSchoolDay(t)).filter(l=>l.sub).map(l=>l.sub.name);
   const sugg=['Spiegami in modo semplice l\'ultimo argomento di '+(recentTopics(1)[0]?recentTopics(1)[0].sub.name:'fisica'),'Fammi 3 esercizi su '+(recentTopics(1)[0]?recentTopics(1)[0].topic:'le proporzioni'),'Come mi organizzo lo studio questa settimana con i turni?','Che differenza c\'è tra massa e peso?'];
-  let h=`<div id="chat" class="chat">${st.chat.length?st.chat.map(m=>`<div class="msg ${m.role}">${m.role==='ai'?md(m.text):esc(m.text)}</div>`).join(''):`<section class="card"><p style="margin:0 0 8px">Chiedi qualsiasi cosa sulle tue materie. ${hasGem()?'Risponde <b>Gemini</b> qui; con il tasto ✦ apri la stessa domanda in <b>Claude</b>.':'Senza chiave Gemini la domanda si apre in <b>Claude</b>, già scritta.'}</p><div class="chips">${sugg.map(s=>`<span class="chip act" onclick="$('#tq').value='${jsq(s)}'">${esc(s)}</span>`).join('')}</div></section>`}</div>`;
+  let h=`<div id="chat" class="chat">${st.chat.length?st.chat.map((m,i)=>`<div class="msg ${m.role}">${m.role==='ai'?md(m.text)+(i===st.chat.length-1&&m.text.length>2&&!m.fb?fbBar(guessSk((st.chat[i-1]||{}).text||''),((st.chat[i-1]||{}).text||'').slice(0,60)):''):esc(m.text)}</div>`).join(''):`<section class="card"><p style="margin:0 0 8px">Chiedi qualsiasi cosa sulle tue materie. ${hasGem()?'Risponde <b>Gemini</b> qui; con il tasto ✦ apri la stessa domanda in <b>Claude</b>.':'Senza chiave Gemini la domanda si apre in <b>Claude</b>, già scritta.'}</p><div class="chips">${sugg.map(s=>`<span class="chip act" onclick="$('#tq').value='${jsq(s)}'">${esc(s)}</span>`).join('')}</div></section>`}</div>`;
   h+=`<div class="composer"><textarea id="tq" rows="2" placeholder="Scrivi o detta la domanda…"></textarea>${micBtn('tq')}<button class="btn pri" onclick="tutorSend()">${hasGem()?'Invia':'Claude'}</button><button class="btn" title="Apri in Claude" onclick="tutorClaude()">✦</button></div>`;
   if(st.chat.length)h+=`<div class="row mt"><button class="btn sm" onclick="st.chat=[];save();render()">Nuova conversazione</button></div>`;
   return h;
 };
+function guessSk(text){let best='generale',sc=0;for(const k in LIB){const m=matchTopics(k,text).length;if(m>sc){sc=m;best=k}}return best}
 VIEWS.tutor.after=()=>{const c=$('#chat');if(c&&c.lastElementChild&&c.lastElementChild.scrollIntoView)c.lastElementChild.scrollIntoView({block:'end'})};
 function tutorContext(){const t=today(),L=lessonsFor(nextSchoolDay(t)).filter(l=>l.sub).map(l=>l.sub.name+(l.topic?' ('+l.topic+')':'')),rt=recentTopics(5).map(x=>x.sub.name+': '+x.topic);return'Prossime lezioni: '+(L.join(', ')||'—')+'. Argomenti recenti: '+(rt.join('; ')||'—')+'.'}
 function tutorClaude(){const q=val('tq')||(st.chat.filter(m=>m.role==='me').pop()||{}).text;if(!q){toast('Scrivi una domanda');return}askClaude(q+'\n'+tutorContext())}
@@ -1604,7 +1828,7 @@ async function tutorSend(){
   st.chat.push({role:'me',text:q});const hist=st.chat.slice(-12,-1);st.chat.push({role:'ai',text:'…'});render();
   try{const a=await gemini(q,{history:hist,sys:'Sei il tutor personale dello studente. Rispondi in italiano, chiaro e concreto, con esempi pratici. Usa elenchi brevi quando servono. '+tutorContext()});st.chat[st.chat.length-1].text=a}
   catch(e){st.chat[st.chat.length-1].text='⚠️ '+e.message}
-  st.chat=st.chat.slice(-30);save();if(ui.view==='tutor')render();
+  st.chat=st.chat.slice(-30);{const tsk=guessSk(q);if(tsk!=='generale')exposure(tsk,q.slice(0,60),'tutor');extractDoubts(q)}save();if(ui.view==='tutor')render();
 }
 
 /* ============ MOTORE SUGGERIMENTI ============ */
@@ -1637,9 +1861,22 @@ function smartTips(target,tonight){
   if(miss.length)T.push({i:'🕳️',t:`${miss.length} giorn${miss.length>1?'i':'o'} di lezione senza presenza registrata.`,a:"sub('att')"});
   const wd=wdOf(t),mo=monday(t);if(wd>=5||wd===0){if(!st.journal[mo])T.push({i:'📓',t:'Fine settimana: tre righe nel <b>diario di bordo</b>. Cosa hai capito, cosa no, cosa fai la prossima.',a:`editJournal('${mo}')`})}
   const lb=st.settings.lastBackup;if((!lb||daysBetween(lb,t)>=7)&&(st.tasks.length+Object.keys(st.att).length+st.cards.length)>5)T.push({i:'💾',t:lb?`Ultimo backup ${daysBetween(lb,t)} giorni fa. Salvalo su Drive in un tocco.`:'Non hai ancora fatto un backup. Un tocco e lo mandi su Drive.',a:'exportData(true)'});
+  const W=weakTopics(3);if(W.length){const w=W[k%W.length];T.push({i:'🧩',t:`Punto da rinforzare: <b>${esc(w.t)}</b> (${esc(skName(w.sk))})${w.why==='dubbio'?', l\'hai segnato come dubbio':' · padronanza '+Math.round(w.m*100)+'%'}. 20 minuti oggi.`,a:`openTopic(subjIdByName('${jsq(skName(w.sk))}'),'${jsq(w.t)}','${w.sk}')`})}
+  const P=pace();if(P.wk){const mo=monday(t),done=(st.ev||[]).filter(e=>e.d>=mo&&(e.k==='learn'||e.k==='seen')).length;T.push({i:'🚀',t:`Verso il <b>${st.goal.year}° anno</b>: ${P.left} argomenti in ${P.wk} settimane, circa <b>${P.perWeek} a settimana</b>.${done<3?' Questa settimana sei ancora fermo: parti dal piano.':''}`,a:"openV('path',null,'study')"})}
+  else if(!st.goal.date)T.push({i:'🚀',t:'Imposta la data degli <b>esami integrativi</b>: calcolo il ritmo che ti serve per il salto.',a:"openV('path',null,'study')"});
+  const ns=(st.scr||[]).filter(x=>x.date>=t).sort((a,b)=>a.date<b.date?-1:1)[0];if(ns){const n=daysBetween(t,ns.date);if(n<=30)T.push({i:'🏅',t:`<b>${esc(ns.name)}</b> tra ${n} giorn${n===1?'o':'i'}.${(()=>{const low=Object.entries(st.grades.reduce((a,g)=>{(a[g.sub]=a[g.sub]||[]).push(g);return a},{})).filter(([s,L])=>gradeAvg(L)<6).map(([s])=>(subById(s)||{}).name).filter(Boolean);return low.length?' Sotto il 6: '+esc(low.join(', '))+'.':''})()}`,a:"sub('scr')"})}
+  const lim=limitFor(target);if(lim&&lim.notBefore){const lost=lessonsFor(target).filter(l=>l.sub&&(l.blocked||l.partial));if(lost.length)T.push({i:'🩺',t:`${esc(lim.type)}: ${fmtShort(target)} entri dalle ${esc(lim.notBefore)}, perdi ${esc([...new Set(lost.map(l=>l.sub.name))].join(', '))}. Chiedi appunti o materiali su Classroom.`,a:"sub('limits')"})}
+  if(st.cr&&st.cr.work&&st.cr.work.length){const pend=st.cr.work.filter(w=>!w.done&&w.due&&w.due>=t&&daysBetween(t,w.due)<=3);if(pend.length)T.push({i:'🎓',t:`Classroom: <b>${esc(pend[0].title)}</b> in scadenza ${fmtShort(pend[0].due)}${pend.length>1?' e altri '+(pend.length-1):''}.`,a:"sub('classroom')"})}
   T.push({i:'✦',t:GEN[k%GEN.length]});
   return T;
 }
+
+/* ---- card percorso ---- */
+function pathCard(){const P=pace(),cy=+st.settings.curYear||1,ty=+st.goal.year||2,W=weakTopics(3);let yp=[];for(let y=cy;y<ty;y++)if(SYL[y])yp.push([y,yearProgress(y)]);
+  return`<section class="card"><div class="card-h"><h3>Il mio percorso</h3><span class="pill">verso il ${ty}° anno</span></div>${yp.map(([y,p])=>`<div class="frow"><span style="min-width:62px"><b>${y}° anno</b></span><div class="grow"><div class="minibar"><i style="width:${p.pct}%"></i></div></div><small class="muted">${p.done}/${p.tot}</small></div>`).join('')}
+  ${P.wk?`<p style="margin:8px 0 0">Ritmo necessario: <b>${P.perWeek} argomenti a settimana</b> per ${P.wk} settimane.</p>`:`<p class="hint">Imposta la data degli esami integrativi per calcolare il ritmo.</p>`}
+  ${W.length?`<div class="sub-h">Da rinforzare</div><div class="chips">${W.map(w=>`<span class="chip act" onclick="openTopic(subjIdByName('${jsq(skName(w.sk))}'),'${jsq(w.t)}','${w.sk}')">🧩 ${esc(w.t)}</span>`).join('')}</div>`:''}
+  <div class="row mt"><button class="btn pri sm" onclick="openV('path',null,'study')">Apri percorso</button><button class="btn sm" onclick="weekPlan()">Piano settimana</button><button class="btn sm" onclick="openV('me',null,'study')">Cosa ho capito di te</button></div></section>`}
 
 /* ============ VALIGIA DEGLI ATTREZZI ============ */
 VIEWS.tools=()=>{
@@ -1749,9 +1986,10 @@ VIEWS.grades=()=>{
   hdr('Altro','Voti e pagella','+ Voto','editGrade()',true);
   if(!st.grades.length)return'<section class="card"><p class="empty-s">Nessun voto. Inserisci verifiche e interrogazioni: vedrai medie, andamento e quanto ti serve per arrivare alla sufficienza.</p></section>';
   const by={};st.grades.forEach(g=>{(by[g.sub]=by[g.sub]||[]).push(g)});
+  const nsc=(st.scr||[]).filter(x=>x.date>=today()).sort((a,b)=>a.date<b.date?-1:1)[0];
   const avgs=Object.entries(by).map(([s,L])=>[s,gradeAvg(L)]).filter(x=>!isNaN(x[1]));
   const tot=avgs.length?avgs.reduce((a,x)=>a+x[1],0)/avgs.length:NaN;
-  let h=`<section class="card"><div class="stat"><div class="big" style="color:${gcol(tot)}">${isNaN(tot)?'—':tot.toFixed(2).replace('.',',')}</div><div><b>Media generale</b><small>media delle medie di ${avgs.length} materi${avgs.length>1?'e':'a'}</small></div></div>${avgs.filter(x=>x[1]<6).length?`<p class="warn">Insufficienze: ${avgs.filter(x=>x[1]<6).map(x=>esc((subById(x[0])||{}).name||'?')).join(', ')}. Serve almeno 6 in tutte per passare al periodo successivo.</p>`:''}</section>`;
+  let h=`<section class="card"><div class="stat"><div class="big" style="color:${gcol(tot)}">${isNaN(tot)?'—':tot.toFixed(2).replace('.',',')}</div><div><b>Media generale</b><small>media delle medie di ${avgs.length} materi${avgs.length>1?'e':'a'}</small></div></div>${nsc?`<p class="hint" onclick="sub('scr')" style="cursor:pointer">🏅 Prossimo: <b>${esc(nsc.name)}</b> il ${fmtShort(nsc.date)} (tra ${daysBetween(today(),nsc.date)} giorni) ›</p>`:''}${avgs.filter(x=>x[1]<6).length?`<p class="warn">Insufficienze: ${avgs.filter(x=>x[1]<6).map(x=>esc((subById(x[0])||{}).name||'?')).join(', ')}. Serve almeno 6 in tutte per passare al periodo successivo.</p>`:''}</section>`;
   h+=Object.entries(by).map(([sid,L])=>{const s=subById(sid),a=gradeAvg(L);L.sort((x,y)=>x.date<y.date?-1:1);
     return`<section class="card"><div class="card-h"><h3 class="dayname">${s?`<span class="dot" style="background:${s.color}"></span> `:''}${esc(s?s.name:'Senza materia')}</h3><b style="color:${gcol(a)}">${a.toFixed(2).replace('.',',')}</b></div><div class="grades">${L.map(g=>`<button class="gr" style="border-color:${gcol(g.v)}" onclick="editGrade('${g.id}')"><b>${String(g.v).replace('.',',')}</b><small>${fmtShort(g.date).slice(4)}</small><small>${esc(g.type.slice(0,5))}${(+g.w||1)!==1?' ×'+g.w:''}</small></button>`).join('')}</div><button class="btn sm mt" onclick="whatIf('${sid}')">🎯 Quanto mi serve?</button></section>`}).join('');
   return h;
@@ -1760,7 +1998,7 @@ function editGrade(id){const g=id?st.grades.find(x=>x.id===id):{sub:'',date:toda
   sheet(id?'Modifica voto':'Nuovo voto',fld('Materia',`<select id="g_s">${subOpts(g.sub)}</select>`)+`<div class="f2">${fld('Voto (es. 6,5 · 7+ · 5-)',`<input id="g_v" inputmode="decimal" value="${esc(g.v)}">`)}${fld('Data',`<input type="date" id="g_d" value="${esc(g.date)}">`)}</div><div class="f2">${fld('Tipo',`<select id="g_t">${opts(['Scritto','Orale','Pratico','Grafico'],g.type)}</select>`)}${fld('Peso',`<select id="g_w">${[['0.5','×0,5'],['1','×1'],['1.5','×1,5'],['2','×2']].map(o=>`<option value="${o[0]}" ${+g.w===+o[0]?'selected':''}>${o[1]}</option>`).join('')}</select>`)}</div>`+fld('Nota',`<input id="g_n" value="${esc(g.note)}" placeholder="argomento, commento del prof">`),
   `${id?`<button class="btn danger left" onclick="st.grades=st.grades.filter(x=>x.id!=='${id}');save();closeSheet();render()">Elimina</button>`:''}<button class="btn pri" onclick="saveGrade(${id?`'${id}'`:'null'})">Salva</button>`)}
 function saveGrade(id){const v=parseGrade(val('g_v'));if(isNaN(v)||v<1||v>10){toast('Voto tra 1 e 10');return}const o={sub:val('g_s'),v,date:val('g_d')||today(),type:val('g_t'),w:+val('g_w')||1,note:val('g_n')};if(!o.sub){toast('Scegli la materia');return}
-  if(id)Object.assign(st.grades.find(x=>x.id===id),o);else st.grades.push({id:uid(),...o});save();closeSheet();render()}
+  if(id)Object.assign(st.grades.find(x=>x.id===id),o);else{st.grades.push({id:uid(),...o});const gs=subById(o.sub);if(gs)learn(subjKeyOf(gs),o.note||'generale',Math.max(0,Math.min(1,(v-4)/6)),.35,'voto')}save();closeSheet();render()}
 function whatIf(sid){const L=st.grades.filter(g=>g.sub===sid),s=subById(sid);
   sheet('Quanto mi serve · '+(s?s.name:''),`<div class="f2">${fld('Media obiettivo',`<input id="wi_t" inputmode="decimal" value="6" oninput="wiCalc('${sid}')">`)}${fld('Peso prossima prova',`<select id="wi_w" onchange="wiCalc('${sid}')"><option value="1">×1</option><option value="2">×2</option><option value="0.5">×0,5</option></select>`)}</div><div class="result" id="wi_r"></div><p class="hint">Media attuale ${gradeAvg(L).toFixed(2).replace('.',',')} su ${L.length} vot${L.length>1?'i':'o'}.</p>`);wiCalc(sid)}
 function wiCalc(sid){const L=st.grades.filter(g=>g.sub===sid),T=num(val('wi_t')),w=+val('wi_w')||1,W=L.reduce((a,g)=>a+(+g.w||1),0),S=L.reduce((a,g)=>a+g.v*(+g.w||1),0),need=(T*(W+w)-S)/w,r=$('#wi_r');
@@ -1781,7 +2019,7 @@ function editJournal(m){const j=st.journal[m]||{a:'',b:'',c:'',ai:''},S=weekSumm
   `<button class="btn pri" onclick="saveJournal('${m}')">Salva</button>`)}
 function journalPrompt(m){const S=weekSummary(m);return`Questa è la mia settimana al serale. Presenze: ${S.pres}, assenze: ${S.abs}, compiti fatti: ${S.done}, studio: ${dur(S.study)}. Argomenti: ${S.topics.join('; ')||'—'}.\nCosa ho capito: ${val('j_a')||'—'}\nCosa non mi è chiaro: ${val('j_b')||'—'}\nPiano: ${val('j_c')||'—'}\nDammi un riscontro onesto e breve e un piano concreto per la prossima settimana, compatibile con i turni di lavoro.`}
 async function journalAI(m){const o=$('#j_ai');if(!hasGem()){askClaude(journalPrompt(m));return}o.innerHTML='<p class="muted"><span class="spin"></span> …</p>';try{const t=await gemini(journalPrompt(m));o.innerHTML=md(t);o._t=t}catch(e){o.innerHTML=`<p class="bad">${esc(e.message)}</p>`}}
-function saveJournal(m){const o=$('#j_ai');st.journal[m]={a:val('j_a'),b:val('j_b'),c:val('j_c'),ai:(o&&o._t)||(st.journal[m]||{}).ai||'',upd:today()};save();closeSheet();render();toast('Settimana salvata')}
+function saveJournal(m){const o=$('#j_ai');st.journal[m]={a:val('j_a'),b:val('j_b'),c:val('j_c'),ai:(o&&o._t)||(st.journal[m]||{}).ai||'',upd:today()};const nd=extractDoubts(st.journal[m].b,m);const ok=extractGot(st.journal[m].a);logEv('journal',{nd});save();closeSheet();render();toast('Settimana salvata'+(nd?' · '+nd+' dubbi da rinforzare':'')+(ok?' · '+ok+' argomenti capiti':''))}
 VIEWS.journal=()=>{hdr('Altro','Diario di bordo','Questa settimana',`editJournal('${monday(today())}')`,true);
   const K=Object.keys(st.journal).sort().reverse();
   return K.length?K.map(m=>{const j=st.journal[m];return`<section class="card" onclick="editJournal('${m}')" style="cursor:pointer"><div class="card-h"><h3>Settimana del ${fmtShort(m)}</h3><span class="chev">›</span></div>${j.a?`<p style="margin:0 0 6px"><b>Capito:</b> ${esc(j.a)}</p>`:''}${j.b?`<p style="margin:0 0 6px"><b>Da chiarire:</b> ${esc(j.b)}</p>`:''}${j.c?`<p style="margin:0"><b>Piano:</b> ${esc(j.c)}</p>`:''}</section>`}).join(''):'<section class="card"><p class="empty-s">Ogni venerdì, tre righe. Tra un anno è la storia del tuo ritorno a scuola.</p></section>'};
@@ -1925,6 +2163,188 @@ setInterval(()=>{notifCheck();if(ui.view==='today'&&!sheetOpen()&&!/INPUT|TEXTAR
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){pomoTick();notifCheck();if(!sheetOpen()&&ui.view==='today')render()}});
 window.addEventListener('online',()=>{if(ui.view==='topic')render()});
 window.addEventListener('error',e=>{console.error(e.error||e.message)});
+
+/* ============ MALATTIA E PERMESSI ============ */
+const LIM_TYPES=['Malattia','Lavoro','Permesso','Altro'];
+VIEWS.limits=()=>{
+  hdr('Altro','Malattia e permessi','+ Nuovo','editLimit()',true);const t=today();
+  const L=(st.limits||[]).slice().sort((a,b)=>a.from<b.from?1:-1);
+  let h=`<section class="card"><p style="margin:0">Periodi in cui non puoi frequentare, o solo in certe ore. L'app segna le lezioni perse, le toglie dal materiale da portare, calcola le <b>ore giustificate</b> e ti ricorda di recuperare gli argomenti.</p></section>`;
+  if(!L.length)return h+'<section class="card"><p class="empty-s">Nessun periodo inserito.</p></section>';
+  h+=L.map(l=>{const act=l.from<=t&&l.to>=t,past=l.to<t;let lost=0,jm=0;for(let d=l.from;d<=l.to&&d<=t;d=addD(d,1)){if(!isWeekday(d))continue;lost+=lessonsFor(d).filter(x=>x.sub&&(x.blocked||x.partial)).length;jm+=justMin(d)}
+    return`<section class="card" onclick="editLimit('${l.id}')" style="cursor:pointer;${past?'opacity:.6':''}"><div class="card-h"><h3>🩺 ${esc(l.type)}</h3>${act?'<span class="pill" style="background:var(--bad);color:#fff">in corso</span>':past?'<span class="muted">concluso</span>':'<span class="pill">futuro</span>'}</div>
+    <p style="margin:0">Dal <b>${fmtDate(l.from)}</b> al <b>${fmtDate(l.to)}</b>${l.notBefore?` · ingresso non prima delle <b>${esc(l.notBefore)}</b>`:''}${l.notAfter?` · uscita entro le <b>${esc(l.notAfter)}</b>`:''}${!l.notBefore&&!l.notAfter?' · <b>nessuna lezione</b>':''}</p>
+    ${l.note?`<p class="muted" style="margin:6px 0 0">${esc(l.note)}</p>`:''}
+    ${lost||jm?`<p class="hint">Finora: ${lost} ore di lezione perse${jm?', '+dur(jm)+' giustificate':''}.</p>`:''}</section>`}).join('');
+  const miss=[];for(const l of L)for(let d=l.from;d<=l.to&&d<t;d=addD(d,1)){if(!isWeekday(d))continue;lessonsFor(d).filter(x=>x.sub&&x.blocked).forEach(x=>miss.push([d,x]))}
+  if(miss.length){const by={};miss.forEach(([d,x])=>{(by[x.sub.name]=by[x.sub.name]||[]).push(d)});
+    h+=`<section class="card"><div class="card-h"><h3>Da recuperare</h3></div>${Object.entries(by).map(([n,D])=>`<div class="frow"><span class="grow"><b>${esc(n)}</b><br><small class="muted">${[...new Set(D)].length} lezioni · ultima ${fmtShort(D[D.length-1])}</small></span></div>`).join('')}<p class="hint">Chiedi gli appunti a un compagno, guarda Classroom o usa Importa smart con la foto del registro.</p><div class="row"><button class="btn sm" onclick="sub('contacts')">Rubrica</button><button class="btn sm" onclick="sub('classroom')">Classroom</button></div></section>`}
+  return h;
+};
+function editLimit(id){
+  const l=id?st.limits.find(x=>x.id===id):{type:'Malattia',from:today(),to:today(),notBefore:'',notAfter:'',note:''};if(!l)return;
+  sheet(id?'Modifica periodo':'Nuovo periodo',fld('Tipo',`<select id="l_ty">${opts(LIM_TYPES,l.type)}</select>`)+`<div class="f2">${fld('Dal',`<input type="date" id="l_f" value="${esc(l.from)}">`)}${fld('Al',`<input type="date" id="l_t" value="${esc(l.to)}">`)}</div><div class="f2">${fld('Posso entrare dalle',`<input type="time" id="l_nb" value="${esc(l.notBefore)}">`)}${fld('Devo uscire entro',`<input type="time" id="l_na" value="${esc(l.notAfter)}">`)}</div><p class="hint">Lascia vuoti gli orari se in quel periodo non puoi frequentare affatto.</p>`+fld('Nota',`<input id="l_n" value="${esc(l.note)}" placeholder="es. certificato medico, fascia di reperibilità">`),
+  `${id?`<button class="btn danger left" onclick="delLimit('${id}')">Elimina</button>`:''}<button class="btn pri" onclick="saveLimit(${id?`'${id}'`:'null'})">Salva</button>`)}
+function saveLimit(id){const o={type:val('l_ty'),from:val('l_f'),to:val('l_t'),notBefore:val('l_nb'),notAfter:val('l_na'),note:val('l_n')};
+  if(!o.from||!o.to||o.to<o.from){toast('Controlla le date');return}
+  if(id)Object.assign(st.limits.find(x=>x.id===id),o);else st.limits.push({id:uid(),...o});save();closeSheet();render()}
+function delLimit(id){if(!confirm('Eliminare il periodo?'))return;st.limits=st.limits.filter(x=>x.id!==id);save();closeSheet();render()}
+
+/* ============ SCRUTINI ============ */
+VIEWS.scr=()=>{
+  hdr('Altro','Scrutini','+ Nuovo','editScr()',true);const t=today();
+  const L=(st.scr||[]).slice().sort((a,b)=>a.date<b.date?-1:1);
+  let h='';
+  if(!L.length)h+=`<section class="card"><p style="margin:0 0 10px">Il serale fa gli scrutini a fine di ogni periodo (in genere ogni trimestre). Inserisci le date: l'app ti avvisa quando si avvicinano e confronta i voti con le tue medie.</p><button class="btn pri" onclick="quickScr()">Crea i 3 trimestri</button></section>`;
+  const by={};st.grades.forEach(g=>{(by[g.sub]=by[g.sub]||[]).push(g)});
+  h+=L.map(x=>{const n=daysBetween(t,x.date),V=Object.entries(x.voti||{}).filter(([s,v])=>v&&v.v!=='');
+    const nums=V.map(([s,v])=>parseGrade(v.v)).filter(v=>!isNaN(v)),avg=nums.length?nums.reduce((a,b)=>a+b,0)/nums.length:NaN;
+    let body='';
+    if(V.length)body=`<div class="grades">${V.map(([sid,v])=>{const s=subById(sid),g=parseGrade(v.v);return`<div class="gr" style="border-color:${isNaN(g)?'var(--line)':gcol(g)}"><b>${esc(v.v)}</b><small>${esc(s?abbr(s.name):'?')}</small></div>`}).join('')}</div>${isNaN(avg)?'':`<p class="hint">Media scrutinio ${avg.toFixed(2).replace('.',',')}${nums.some(v=>v<6)?' · insufficienze: '+V.filter(([s,v])=>parseGrade(v.v)<6).map(([s])=>esc((subById(s)||{}).name||'?')).join(', '):''}</p>`}`;
+    else if(n>=0){const cur=Object.entries(by).map(([s,G])=>[s,gradeAvg(G)]).filter(z=>!isNaN(z[1]));body=cur.length?`<div class="sub-h">Le tue medie adesso</div><div class="grades">${cur.map(([s,a])=>`<div class="gr" style="border-color:${gcol(a)}"><b>${a.toFixed(1).replace('.',',')}</b><small>${esc(abbr((subById(s)||{name:'?'}).name))}</small></div>`).join('')}</div>`:'<p class="hint">Nessun voto ancora: inseriscili in Voti per avere una previsione.</p>'}
+    return`<section class="card" onclick="editScr('${x.id}')" style="cursor:pointer"><div class="card-h"><h3>🏅 ${esc(x.name)}</h3><span class="${n>=0&&n<=14?'pill':'muted'}">${n>0?'tra '+n+' g':n===0?'oggi':fmtShort(x.date)}</span></div><p class="muted" style="margin:0 0 6px">${fmtLong(x.date)}</p>${body}${x.note?`<p class="muted">${esc(x.note)}</p>`:''}</section>`}).join('');
+  return h;
+};
+function quickScr(){const y=+(st.settings.start||today()).slice(0,4);[['Primo trimestre',y+'-12-18'],['Secondo trimestre',(y+1)+'-03-20'],['Scrutinio finale',(y+1)+'-06-10']].forEach(([n,d])=>{while(!isWeekday(d))d=addD(d,-1);st.scr.push({id:uid(),name:n,date:d,voti:{},note:'Data indicativa: correggila con quella della scuola'})});save();render();toast('Creati: correggi le date appena le sai')}
+function editScr(id){
+  const x=id?st.scr.find(z=>z.id===id):{name:'',date:today(),voti:{},note:''};if(!x)return;
+  const subs=st.subjects.filter(s=>!s.credit);
+  sheet(id?x.name:'Nuovo scrutinio',`<div class="f2">${fld('Nome',`<input id="sc_n" value="${esc(x.name)}" placeholder="es. Primo trimestre">`)}${fld('Data',`<input type="date" id="sc_d" value="${esc(x.date)}">`)}</div><div class="sub-h">Voti in pagella (dopo lo scrutinio)</div>${subs.map(s=>`<div class="frow"><span class="grow"><span class="dot" style="background:${s.color}"></span> ${esc(s.name)}</span><input class="inp" style="width:74px" id="sc_v_${s.id}" inputmode="decimal" value="${esc(((x.voti||{})[s.id]||{}).v||'')}" placeholder="—"></div>`).join('')}`+fld('Note / giudizio',`<textarea id="sc_no" rows="2">${esc(x.note)}</textarea>`),
+  `${id?`<button class="btn danger left" onclick="if(confirm('Eliminare?')){st.scr=st.scr.filter(z=>z.id!=='${id}');save();closeSheet();render()}">Elimina</button>`:''}<button class="btn pri" onclick="saveScr(${id?`'${id}'`:'null'})">Salva</button>`)}
+function saveScr(id){const o={name:val('sc_n')||'Scrutinio',date:val('sc_d'),note:val('sc_no'),voti:{}};if(!o.date){toast('Serve la data');return}
+  let nv=0;st.subjects.forEach(s=>{const v=val('sc_v_'+s.id);if(v){o.voti[s.id]={v};nv++}});
+  const old=id?st.scr.find(z=>z.id===id):null,had=old?Object.keys(old.voti||{}).length:0;
+  if(old)Object.assign(old,o);else st.scr.push({id:uid(),...o});
+  if(nv&&!had)Object.entries(o.voti).forEach(([sid,v])=>{const g=parseGrade(v.v),s=subById(sid);if(s&&!isNaN(g))learn(subjKeyOf(s),'generale',Math.max(0,Math.min(1,(g-4)/6)),.4,'scrutinio')});
+  logEv('scr',{nv});save();closeSheet();render()}
+
+/* ============ GOOGLE CLASSROOM ============ */
+const CR_SCOPES=['https://www.googleapis.com/auth/classroom.courses.readonly','https://www.googleapis.com/auth/classroom.coursework.me.readonly','https://www.googleapis.com/auth/classroom.courseworkmaterials.readonly','https://www.googleapis.com/auth/classroom.announcements.readonly'].join(' ');
+const CR_API='https://classroom.googleapis.com/v1';
+let _crTok=null,_crExp=0,_crBusy=false;
+function loadGIS(){return new Promise((res,rej)=>{if(window.google&&google.accounts&&google.accounts.oauth2)return res();const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.async=true;s.onload=()=>res();s.onerror=()=>rej(new Error('Non riesco a caricare l\'accesso Google (sei online?)'));document.head.appendChild(s)})}
+async function crToken(){
+  if(_crTok&&Date.now()<_crExp-60000)return _crTok;
+  const cid=st.settings.gClientId;if(!cid)throw new Error('Manca il Client ID: segui la guida qui sotto.');
+  await loadGIS();
+  return new Promise((res,rej)=>{const c=google.accounts.oauth2.initTokenClient({client_id:cid,scope:CR_SCOPES,prompt:'',callback:r=>{if(r.error){rej(new Error(r.error==='access_denied'?'Accesso negato. Se usi l\'account della scuola, l\'amministratore potrebbe aver bloccato le app esterne.':'Errore Google: '+r.error));return}_crTok=r.access_token;_crExp=Date.now()+(+r.expires_in||3600)*1000;res(_crTok)},error_callback:e=>rej(new Error(e&&e.type==='popup_closed'?'Finestra di accesso chiusa.':'Accesso Google non riuscito ('+(e&&e.type||'?')+').'))});c.requestAccessToken()})}
+async function crGet(path){const tk=await crToken();const r=await fetch(CR_API+path,{headers:{Authorization:'Bearer '+tk}});const j=await r.json().catch(()=>({}));
+  if(!r.ok){const m=j.error&&j.error.message||'';if(r.status===403)throw new Error('Classroom ha rifiutato l\'accesso: '+(/disabled|not been used/i.test(m)?'abilita "Google Classroom API" nel progetto Google Cloud.':/admin|domain|policy/i.test(m)?'l\'amministratore della scuola blocca le app esterne. Usa Importa smart.':m));if(r.status===401){_crTok=null;throw new Error('Sessione Google scaduta, riprova.')}throw new Error('Errore Classroom '+r.status+': '+m)}return j}
+async function crAll(path,key){let out=[],tok='';for(let i=0;i<10;i++){const j=await crGet(path+(path.includes('?')?'&':'?')+'pageSize=100'+(tok?'&pageToken='+encodeURIComponent(tok):''));out=out.concat(j[key]||[]);tok=j.nextPageToken;if(!tok)break}return out}
+const crDate=(d,t)=>d?d.year+'-'+pad(d.month)+'-'+pad(d.day):'';
+function crSubFor(c){if(st.cr.map[c.id]!==undefined)return st.cr.map[c.id];const n=(c.name+' '+(c.section||'')).toLowerCase();let best='',bs=0;
+  st.subjects.forEach(s=>{const a=norm(s.name).split(' ').filter(w=>w.length>3);const sc=a.filter(w=>n.includes(w.slice(0,5))).length/(a.length||1);if(sc>bs){bs=sc;best=s.id}});
+  if(!best){const k=libKeyFor(c.name);const s=k&&st.subjects.find(x=>libOf(x)===k);if(s)best=s.id}return bs>=.5||best?best:''}
+async function crSync(){
+  if(_crBusy)return;_crBusy=true;const o=$('#cr_st');const say=t=>{if(o)o.innerHTML=t};
+  try{say('<span class="spin"></span> Accesso a Google…');
+    const courses=await crAll('/courses?studentId=me&courseStates=ACTIVE','courses');
+    st.cr.courses=courses.map(c=>({id:c.id,name:c.name,section:c.section||'',link:c.alternateLink,room:c.room||''}));
+    const work=[],mats=[],ann=[];
+    for(const c of courses){say(`<span class="spin"></span> ${esc(c.name)}…`);
+      const [W,S,M,A]=await Promise.all([crAll(`/courses/${c.id}/courseWork?orderBy=updateTime%20desc`,'courseWork').catch(()=>[]),crAll(`/courses/${c.id}/courseWork/-/studentSubmissions?userId=me`,'studentSubmissions').catch(()=>[]),crAll(`/courses/${c.id}/courseWorkMaterials`,'courseWorkMaterial').catch(()=>[]),crGet(`/courses/${c.id}/announcements?pageSize=15`).then(j=>j.announcements||[]).catch(()=>[])]);
+      const sub={};S.forEach(s=>sub[s.courseWorkId]=s);
+      W.forEach(w=>{const s=sub[w.id]||{};work.push({id:w.id,course:c.id,title:w.title||'(senza titolo)',desc:(w.description||'').slice(0,600),due:crDate(w.dueDate),time:w.dueTime&&w.dueTime.hours!==undefined?pad(w.dueTime.hours)+':'+pad(w.dueTime.minutes||0):'',link:w.alternateLink,max:w.maxPoints||0,type:w.workType,state:s.state||'',grade:s.assignedGrade!==undefined?s.assignedGrade:null,late:!!s.late,done:s.state==='TURNED_IN'||s.state==='RETURNED',mats:crMats(w.materials)})});
+      M.forEach(m=>mats.push({id:m.id,course:c.id,title:m.title||'Materiale',desc:(m.description||'').slice(0,400),link:m.alternateLink,upd:(m.updateTime||'').slice(0,10),mats:crMats(m.materials)}));
+      A.forEach(a=>ann.push({id:a.id,course:c.id,text:(a.text||'').slice(0,800),link:a.alternateLink,upd:(a.updateTime||'').slice(0,10),mats:crMats(a.materials)}));
+    }
+    st.cr.work=work;st.cr.mats=mats;st.cr.ann=ann.sort((a,b)=>a.upd<b.upd?1:-1).slice(0,40);st.cr.synced=new Date().toISOString();
+    const r=crImport();logEv('cr',{c:courses.length,w:work.length});save();render();toast(`Classroom: ${courses.length} corsi · ${r.nt} compiti nuovi${r.ng?' · '+r.ng+' voti':''}`);
+  }catch(e){say(`<span class="bad">${esc(e.message)}</span>`)}finally{_crBusy=false}
+}
+function crMats(M){return(M||[]).map(m=>m.driveFile?{t:m.driveFile.driveFile.title,u:m.driveFile.driveFile.alternateLink,k:'📄'}:m.link?{t:m.link.title||m.link.url,u:m.link.url,k:'🔗'}:m.youtubeVideo?{t:m.youtubeVideo.title,u:m.youtubeVideo.alternateLink,k:'▶️'}:m.form?{t:m.form.title,u:m.form.formUrl,k:'📝'}:null).filter(Boolean)}
+function crImport(){let nt=0,ng=0;
+  st.cr.work.forEach(w=>{const c=st.cr.courses.find(x=>x.id===w.course)||{},sid=crSubFor(c);
+    let t=st.tasks.find(x=>x.crId===w.id);
+    if(!t&&(w.due||!w.done)){t={id:uid(),crId:w.id,title:w.title,type:/quiz|verific|test/i.test(w.title)?'Verifica':'Compito',sub:sid,assigned:today(),due:w.due,desc:(w.desc?w.desc+'\n':'')+'Classroom: '+w.link,done:w.done};st.tasks.push(t);nt++}
+    else if(t){if(w.done&&!t.done)t.done=true;if(w.due&&t.due!==w.due)t.due=w.due}
+    if(w.grade!==null&&w.max&&sid&&!st.grades.some(g=>g.crId===w.id)){const v=Math.round(w.grade/w.max*10*4)/4;if(v>=1){st.grades.push({id:uid(),crId:w.id,sub:sid,v,date:today(),type:'Scritto',w:1,note:'Classroom: '+w.title});learn(subjKeyOf(subById(sid)),w.title,Math.max(0,Math.min(1,(v-4)/6)),.3,'classroom');ng++}}
+  });return{nt,ng}}
+VIEWS.classroom=()=>{
+  hdr('Altro','Google Classroom',st.settings.gClientId?'Sincronizza':'','crSync()',true);const C=st.cr,t=today();
+  let h=`<section class="card"><div id="cr_st" class="muted" style="font-size:13.5px">${C.synced?'Ultima sincronizzazione: '+fmtShort(C.synced.slice(0,10))+' '+C.synced.slice(11,16):'Non ancora collegato.'}</div>${st.settings.gClientId?`<button class="btn pri mt" onclick="crSync()">🔄 Sincronizza ora</button>`:''}</section>`;
+  if(C.courses.length){
+    const pend=C.work.filter(w=>!w.done).sort((a,b)=>(a.due||'9')<(b.due||'9')?-1:1);
+    h+=`<section class="card"><div class="card-h"><h3>Compiti da consegnare</h3><span class="muted">${pend.length}</span></div>${pend.length?pend.slice(0,15).map(w=>{const c=C.courses.find(x=>x.id===w.course)||{};return`<div class="li"><div class="grow"><b>${esc(w.title)}</b><small>${esc(c.name||'')}${w.due?` · <span class="${w.due<t?'bad':''}">${w.due<t?'scaduto ':'entro '}${fmtShort(w.due)}${w.time?' '+w.time:''}</span>`:''}</small>${w.mats.length?`<div class="chips mt">${w.mats.map(m=>`<a class="chip act" href="${esc(m.u)}" target="_blank" rel="noopener">${m.k} ${esc(m.t)}</a>`).join('')}</div>`:''}</div><a class="btn sm" href="${esc(w.link)}" target="_blank" rel="noopener">Apri e consegna</a></div>`}).join(''):'<p class="empty-s">Tutto consegnato. 👌</p>'}<p class="hint">La consegna si fa dentro Classroom (Google non permette alle app esterne di consegnare al posto tuo): il tasto apre il compito già pronto.</p></section>`;
+    if(C.ann.length)h+=`<section class="card"><div class="card-h"><h3>Annunci</h3></div>${C.ann.slice(0,8).map(a=>{const c=C.courses.find(x=>x.id===a.course)||{};return`<div class="li"><div class="grow"><small class="muted">${esc(c.name||'')} · ${a.upd?fmtShort(a.upd):''}</small><div style="font-size:14px;white-space:pre-wrap">${esc(a.text.slice(0,300))}${a.text.length>300?'…':''}</div>${a.mats.length?`<div class="chips mt">${a.mats.map(m=>`<a class="chip act" href="${esc(m.u)}" target="_blank" rel="noopener">${m.k} ${esc(m.t)}</a>`).join('')}</div>`:''}</div><a class="ib" href="${esc(a.link)}" target="_blank" rel="noopener">↗</a></div>`}).join('')}</section>`;
+    if(C.mats.length)h+=`<section class="card"><div class="card-h"><h3>Materiali e dispense</h3></div>${C.mats.slice(0,25).map(m=>{const c=C.courses.find(x=>x.id===m.course)||{};return`<div class="li"><div class="grow"><b>${esc(m.title)}</b><small>${esc(c.name||'')}${m.upd?' · '+fmtShort(m.upd):''}</small><div class="chips mt">${m.mats.map(x=>`<a class="chip act" href="${esc(x.u)}" target="_blank" rel="noopener">${x.k} ${esc(x.t)}</a>`).join('')}</div></div><button class="ib" title="Studia con l'AI" onclick="crStudy('${m.id}')">📚</button></div>`}).join('')}<p class="hint">Scarica un PDF da Drive e caricalo nell'Archivio, o fotografa una pagina: Gemini la spiega e crea flashcard.</p></section>`;
+    h+=`<section class="card"><div class="card-h"><h3>Corsi e materie</h3></div>${C.courses.map(c=>`<div class="frow"><span class="grow" style="font-size:14px"><b>${esc(c.name)}</b>${c.section?`<br><small class="muted">${esc(c.section)}</small>`:''}</span><select class="inp" style="max-width:48%" onchange="st.cr.map['${c.id}']=this.value;save()">${subOpts(crSubFor(c))}</select></div>`).join('')}<p class="hint">Collega ogni corso alla sua materia: compiti e voti finiscono nel posto giusto.</p></section>`;
+  }
+  h+=`<section class="card"><div class="card-h"><h3>${st.settings.gClientId?'Configurazione':'Collega Classroom (una volta sola, 10 minuti)'}</h3></div>
+  ${fld('Client ID OAuth',`<input id="cr_cid" value="${esc(st.settings.gClientId)}" placeholder="xxxxxxxx.apps.googleusercontent.com" onchange="setS('gClientId',this.value.trim());render()">`)}
+  <details class="det" ${st.settings.gClientId?'':'open'}><summary>Come ottenerlo</summary><ol class="steps">
+  <li>Apri <a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener">Google Cloud Console</a> con il tuo account personale e crea il progetto <b>diario-serale</b> (lo stesso di AI Studio va benissimo).</li>
+  <li>Menu <b>API e servizi → Libreria</b>: cerca <b>Google Classroom API</b> e premi <b>Abilita</b>.</li>
+  <li><b>Schermata consenso OAuth</b>: tipo <b>Esterno</b>, nome app "Diario Serale", la tua email. In <b>Utenti di test</b> aggiungi l'account con cui entri in Classroom.</li>
+  <li><b>Credenziali → Crea credenziali → ID client OAuth</b> → tipo <b>Applicazione web</b>. In <b>Origini JavaScript autorizzate</b> metti <code>https://soldato31.github.io</code>.</li>
+  <li>Copia il <b>Client ID</b> (finisce con .apps.googleusercontent.com), incollalo qui sopra e premi Sincronizza.</li></ol>
+  <p class="hint">Solo lettura: l'app vede corsi, compiti, voti, materiali e annunci. Il token resta in memoria e sparisce alla chiusura. Se l'account è della scuola (@marconihack…) e compare "accesso bloccato", l'amministratore non consente app esterne: in quel caso usa <b>Importa smart</b> con screenshot di Classroom o del registro.</p></details></section>`;
+  return h;
+};
+function crStudy(id){const m=st.cr.mats.find(x=>x.id===id);if(!m)return;const c=st.cr.courses.find(x=>x.id===m.course)||{};openTopic(crSubFor(c),m.title)}
+
+/* ============ IMPORTA SMART (registro, Classroom, foto, testo) ============ */
+let _imp=null;
+VIEWS.imp=()=>{
+  hdr('Altro','Importa smart','','',true);
+  let h=`<section class="card"><p style="margin:0 0 10px">Incolla il testo dal <b>registro elettronico</b> (compiti, argomenti delle lezioni, voti, note) o da Classroom, WhatsApp di classe, email del prof. Oppure fotografa lo schermo. Gemini estrae compiti, voti, argomenti svolti, scadenze e scrutini: tu confermi cosa aggiungere.</p>
+  <div class="inrow top"><textarea class="inp" id="imp_t" rows="7" placeholder="es. «Matematica - 22/09 - Argomento: monomi e polinomi. Compiti: pag. 45 es. 1-12 per lunedì»"></textarea>${micBtn('imp_t')}</div>
+  <div class="row mt"><label class="btn sm">📷 Foto / screenshot<input type="file" accept="image/*" multiple hidden onchange="impPhotos(this)"></label><span id="imp_ph" class="muted" style="font-size:13px"></span></div>
+  <button class="btn pri wide mt" onclick="impRun()">${hasGem()?'✦ Analizza':'Serve Gemini: collegalo'}</button></section><div id="imp_out"></div>`;
+  if(!hasGem())h+=`<section class="card"><p class="muted" style="margin:0">L'estrazione usa Gemini. <a href="#" onclick="sub('settings');return false">Collega la chiave in Impostazioni</a>.</p></section>`;
+  if(st.ext.length)h+=`<section class="card"><div class="card-h"><h3>Argomenti importati</h3><span class="muted">${st.ext.length}</span></div><div class="chips">${st.ext.slice(-20).reverse().map(x=>`<span class="chip">${esc(x.t)} <small class="muted">· ${esc(skName(x.sk))}</small></span>`).join('')}</div><p class="hint">Contano come "affrontati" nel percorso e alimentano i suggerimenti.</p></section>`;
+  return h;
+};
+VIEWS.imp.after=()=>{if(_imp&&_imp.res)impShow()};
+let _impImgs=[];
+async function impPhotos(inp){_impImgs=[];for(const f of [...inp.files].slice(0,4)){const b=await shrinkImage(f,1800);_impImgs.push({mime:b.type||'image/jpeg',b64:await blobToB64(b)})}const e=$('#imp_ph');if(e)e.textContent=_impImgs.length+' immagin'+(_impImgs.length>1?'i':'e')+' pronte'}
+async function impRun(){
+  if(!hasGem()){sub('settings');return}
+  const txt=val('imp_t');if(!txt&&!_impImgs.length){toast('Incolla un testo o aggiungi una foto');return}
+  const out=$('#imp_out');out.innerHTML='<section class="card"><p class="muted"><span class="spin"></span> Gemini sta leggendo…</p></section>';
+  const subs=st.subjects.map(s=>s.name).join(', ');
+  const P=`Oggi è ${today()} (${WDL[wdOf(today())]}). Materie dello studente: ${subs}.
+Dal contenuto seguente (testo e/o immagini da registro elettronico, Classroom, messaggi) estrai le informazioni scolastiche. Converti date relative ("per lunedì", "domani") in date ISO YYYY-MM-DD future rispetto a oggi. Usa per "subject" il nome della materia più vicino tra quelle elencate. Non inventare nulla: se un campo manca lascialo vuoto.
+Rispondi SOLO con JSON:
+{"tasks":[{"title":"","type":"Compito|Esercizi|Studio|Verifica|Interrogazione|Altro","subject":"","due":"YYYY-MM-DD","desc":""}],
+"grades":[{"subject":"","value":"7+","date":"YYYY-MM-DD","type":"Scritto|Orale|Pratico|Grafico","note":""}],
+"topics":[{"subject":"","topic":"","date":"YYYY-MM-DD"}],
+"events":[{"title":"","date":"YYYY-MM-DD","time":"HH:MM","place":""}],
+"scrutini":[{"name":"","date":"YYYY-MM-DD"}],
+"absences":[{"date":"YYYY-MM-DD","note":""}]}
+
+CONTENUTO:
+${txt||'(vedi immagini)'}`;
+  try{const r=await gemini(P,{json:true,images:_impImgs});_imp={res:impNorm(r)};impShow();logEv('imp',{})}catch(e){out.innerHTML=`<section class="card"><p class="bad">${esc(e.message)}</p></section>`}
+}
+function subIdFuzzy(n){if(!n)return'';const a=norm(n);let s=st.subjects.find(x=>norm(x.name)===a);if(s)return s.id;s=st.subjects.find(x=>norm(x.name).includes(a)||a.includes(norm(x.name)));if(s)return s.id;const k=libKeyFor(n);s=k&&st.subjects.find(x=>libOf(x)===k);return s?s.id:''}
+const isoOk=d=>/^\d{4}-\d{2}-\d{2}$/.test(d||'');
+function impNorm(r){r=r||{};const A=k=>Array.isArray(r[k])?r[k]:[];
+  return{tasks:A('tasks').filter(x=>x.title).map(x=>({...x,sid:subIdFuzzy(x.subject),due:isoOk(x.due)?x.due:'',type:TYPES.includes(x.type)?x.type:'Compito'})),
+    grades:A('grades').filter(x=>!isNaN(parseGrade(x.value))).map(x=>({...x,sid:subIdFuzzy(x.subject),v:parseGrade(x.value),date:isoOk(x.date)?x.date:today()})),
+    topics:A('topics').filter(x=>x.topic).map(x=>({...x,sid:subIdFuzzy(x.subject),date:isoOk(x.date)?x.date:today()})),
+    events:A('events').filter(x=>x.title&&isoOk(x.date)),
+    scrutini:A('scrutini').filter(x=>isoOk(x.date)).map(x=>({name:x.name||'Scrutinio',date:x.date})),
+    absences:A('absences').filter(x=>isoOk(x.date))}}
+function impShow(){const R=_imp.res,out=$('#imp_out');if(!out)return;const sn=id=>{const s=subById(id);return s?esc(s.name):'<span class="bad">materia?</span>'};
+  const grp=(k,title,row)=>R[k].length?`<div class="sub-h">${title}</div>`+R[k].map((x,i)=>`<button class="chk on imp" data-k="${k}" data-i="${i}" onclick="this.classList.toggle('on')"><i></i><span>${row(x)}</span></button>`).join(''):'';
+  const body=grp('tasks','Compiti',x=>`<b>${esc(x.title)}</b><br><small>${sn(x.sid)} · ${esc(x.type)}${x.due?' · per '+fmtShort(x.due):''}</small>`)+
+    grp('grades','Voti',x=>`<b>${esc(x.value)}</b> ${sn(x.sid)}<br><small>${fmtShort(x.date)} · ${esc(x.type||'')} ${esc(x.note||'')}</small>`)+
+    grp('topics','Argomenti svolti',x=>`<b>${esc(x.topic)}</b><br><small>${sn(x.sid)} · ${fmtShort(x.date)}</small>`)+
+    grp('events','Appuntamenti',x=>`<b>${esc(x.title)}</b><br><small>${fmtShort(x.date)} ${esc(x.time||'')} ${esc(x.place||'')}</small>`)+
+    grp('scrutini','Scrutini',x=>`<b>${esc(x.name)}</b><br><small>${fmtLong(x.date)}</small>`)+
+    grp('absences','Assenze',x=>`<b>${fmtShort(x.date)}</b><br><small>${esc(x.note||'')}</small>`);
+  out.innerHTML=`<section class="card"><div class="card-h"><h3>Trovato</h3></div>${body||'<p class="empty-s">Niente di utile trovato. Prova con più testo o una foto più nitida.</p>'}${body?'<button class="btn pri wide mt" onclick="impApply()">Aggiungi selezionati</button>':''}</section>`}
+function impApply(){const R=_imp.res;let n=0;
+  document.querySelectorAll('.imp.on').forEach(b=>{const k=b.dataset.k,x=R[k][+b.dataset.i];n++;
+    if(k==='tasks'){if(!st.tasks.some(t=>t.title===x.title&&t.due===x.due))st.tasks.push({id:uid(),title:x.title,type:x.type,sub:x.sid,assigned:today(),due:x.due,desc:x.desc||'',done:false,topic:''})}
+    else if(k==='grades'){st.grades.push({id:uid(),sub:x.sid,v:x.v,date:x.date,type:['Scritto','Orale','Pratico','Grafico'].includes(x.type)?x.type:'Scritto',w:1,note:x.note||'da registro'});const s=subById(x.sid);if(s)learn(subjKeyOf(s),x.note||'generale',Math.max(0,Math.min(1,(x.v-4)/6)),.35,'voto')}
+    else if(k==='topics'){const s=subById(x.sid),sk=s?subjKeyOf(s):subjKeyByName(x.subject||'');st.ext.push({sk,t:x.topic,d:x.date,sid:x.sid});exposure(sk,x.topic,'registro')}
+    else if(k==='events')st.notes.push({id:uid(),type:'appt',title:x.title,date:x.date,time:x.time||'',place:x.place||'',body:'Importato',upd:new Date().toISOString()});
+    else if(k==='scrutini'){if(!st.scr.some(s=>s.date===x.date))st.scr.push({id:uid(),name:x.name,date:x.date,voti:{},note:''})}
+    else if(k==='absences'){if(!st.att[x.date])st.att[x.date]={status:'absent',reason:limitFor(x.date)?limitFor(x.date).type:'Altro',note:x.note||'da registro'}}
+  });
+  _imp=null;_impImgs=[];save();render();toast(n+' elementi aggiunti')}
 
 </script>
 </body>
