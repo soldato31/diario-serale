@@ -763,9 +763,9 @@ function migrate(s){
   if(s.v<3&&o.settings.aiProfile===s.settings?.aiProfile&&/primo periodo didattico/.test(o.settings.aiProfile))o.settings.aiProfile=AI_PROFILE;
   for(let x=1;x<=5;x++)if(!Array.isArray(o.tt[x]))o.tt[x]=[];
   o.subjects.forEach(x=>{if(x.credit===undefined)x.credit=false;if(!Array.isArray(x.materials))x.materials=[]});
-  o.v=3;return o;
+  o.v=3;return applyTT2627(o);
 }
-function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.v)return migrate(s)}catch(e){}return defaults()}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.v)return migrate(s)}catch(e){}return applyTT2627(defaults())}
 let st=load();
 let _idbT=null,_ver=0;
 function save(){
@@ -810,7 +810,8 @@ function lessonsFor(s){
     if(subst){if(subst.sub&&subst.sub!==(sub&&sub.id)){orig=sub;sub=subById(subst.sub)||sub}if(subst.who)prof={name:subst.who,sup:true}}
     const lim=limitFor(s);let blocked=false,partial=false;
     if(lim){const a=toMin(x.start),b=toMin(x.end),nb=lim.notBefore?toMin(lim.notBefore):0,na=lim.notAfter?toMin(lim.notAfter):1440;if(b<=nb||a>=na)blocked=true;else if(a<nb||b>na)partial=true}
-    return{...x,sub,orig,prof,subst,topic:o.topic||'',note:o.note||'',sup:!!(o.sub||o.prof||subst),credit:!!(sub&&sub.credit),blocked,partial,lim};
+    const co=subst||o.sub||o.prof?null:conById(c.co)||null;
+    return{...x,sub,orig,prof,co,subst,topic:o.topic||'',note:o.note||'',sup:!!(o.sub||o.prof||subst),credit:!!(sub&&sub.credit),blocked,partial,lim};
   });
 }
 function schedWindow(s){const L=lessonsFor(s);const real=L.filter(l=>l.sub&&!l.credit);if(real.length)return real;if(L.some(l=>l.sub))return[];return L}
@@ -885,6 +886,38 @@ function limitFor(d){const L=(st.limits||[]).filter(l=>l.from&&l.to&&d>=l.from&&
 function justMin(d){const lim=limitFor(d);if(!lim)return 0;const r=st.att[d];if(!r||r.status==='off')return 0;
   const nb=lim.notBefore?toMin(lim.notBefore):0,na=lim.notAfter?toMin(lim.notAfter):1440;
   return schedWindow(d).reduce((a,l)=>{const s=toMin(l.start),e=toMin(l.end);return a+Math.max(0,Math.min(e,nb)-s)+Math.max(0,e-Math.max(s,na))},0)}
+
+/* ============ ORARIO 2026/27 · classe 1ª M serale (provvisorio dal 21/09/2026) ============ */
+
+function applyTT2627(o){
+  if(!o||o.ttVer==='2627-1m-p1')return o;
+  const nz=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  o.subjects=o.subjects||[];o.contacts=o.contacts||[];
+  const S=(match,name,mats)=>{let s=o.subjects.find(x=>match.some(m=>nz(x.name).includes(m)));
+    if(!s){s={id:'s'+Math.random().toString(36).slice(2,8),name,color:PALETTE[o.subjects.length%PALETTE.length],materials:mats||['Quaderno'],credit:false};o.subjects.push(s)}
+    s.credit=false;return s.id};
+  const P=(surname,full,sid)=>{if(!surname)return'';let c=o.contacts.find(x=>nz(x.name).includes(nz(surname)));
+    if(!c){c={id:'c'+Math.random().toString(36).slice(2,8),name:full,role:'Docente',sub:sid,phone:'',email:'',note:''};o.contacts.push(c)}
+    else if(!c.sub)c.sub=sid;return c.id};
+  const ita=S(['italian'],'Italiano'),ing=S(['ingles'],'Inglese'),mat=S(['matemat'],'Matematica',['Quaderno a quadretti','Calcolatrice scientifica','Righello']),
+    sci=S(['scienze integrate','scienze della terra','biolog'],'Scienze integrate (Terra e Biologia)'),fis=S(['fisica'],'Fisica',['Quaderno','Calcolatrice scientifica']),
+    chi=S(['chimica'],'Chimica',['Quaderno','Tavola periodica','Calcolatrice scientifica']),dis=S(['disegno','rappresentazione grafica'],'Disegno tecnico'),
+    inf=S(['tecnologie informatiche','informatic'],'Tecnologie informatiche',['Chiavetta USB','Quaderno']);
+  const pLib=P('Liberti','Prof.ssa Rita Liberti',ita),pDiv=P('Di Virgilio','Prof.ssa Elisabetta Di Virgilio',ing),pLon=P('Lonigro','Prof. Antonio Lonigro',mat),
+    pSal=P('Salvemini','Prof. Michele Salvemini',fis),pPas=P('Pascale','Prof. Paolo Pascale',chi),pRot=P('Rotolo','Prof. Pasquale Rotolo',dis),
+    pDev=P('Devanna','Prof.ssa Antonella Devanna',inf),pBel=P('Bellino','Prof.ssa Maria Grazia Bellino (lab. chimica)',chi),
+    pPep=P('Peppino','Prof. Nicola Peppino (lab. fisica)',fis),pVas=P('Vasto','Prof. Antonio Vasto (lab. meccanico)',dis),pNap=P('Napolitano','Prof. Giuseppe Napolitano (lab. informatica)',inf);
+  const c=(sub,prof,co)=>co?{sub,prof,co}:{sub,prof};
+  o.ttPrev=o.tt;
+  o.tt={
+    1:[c(fis,pSal),c(fis,pSal),c(ing,pDiv),c(mat,pLon),c(sci,'')],
+    2:[c(chi,pPas),c(chi,pPas,pBel),c(dis,pRot),c(dis,pRot),{}],
+    3:[c(inf,pDev),c(ita,pLib),c(fis,pSal,pPep),c(mat,pLon),c(mat,pLon)],
+    4:[c(dis,pRot,pVas),c(ing,pDiv),c(sci,''),c(sci,''),{}],
+    5:[c(inf,pDev,pNap),c(inf,pDev,pNap),c(ita,pLib),c(ita,pLib),{}]};
+  o.settings=o.settings||{};o.settings.classe='1ª M · 1° periodo';
+  o.ttVer='2627-1m-p1';o._ttNew=true;return o;
+}
 
 /* ============ INTELLIGENZA ARTIFICIALE ============ */
 const GEM_BASE='https://generativelanguage.googleapis.com/v1beta';
@@ -1060,11 +1093,12 @@ function attChip(d){
 function checkIn(){const t=today(),lim=limitFor(t);if(lim&&lim.notBefore&&nowMin()<toMin(lim.notBefore)&&!confirm('Hai impostato ingresso non prima delle '+lim.notBefore+'. Registrare comunque il check-in adesso?'))return;st.att[t]=Object.assign(st.att[t]||{},{status:'present',in:hm(nowMin()),out:''});save();toast('Check-in '+st.att[t].in);render()}
 function checkOut(){const r=st.att[today()];if(!r)return;r.out=hm(nowMin());save();toast('Check-out '+r.out);render()}
 function lessonList(d,live){
-  const L=lessonsFor(d);if(!L.length)return'<p class="empty-s">Nessuna lezione.</p>';
+  let L=lessonsFor(d);if(!L.length)return'<p class="empty-s">Nessuna lezione.</p>';
+  const last=L.map(l=>!!l.sub).lastIndexOf(true);if(last>=0)L=L.slice(0,last+1);
   const N=nowMin(),isT=d===today();
   return'<div class="lessons">'+L.map(l=>{
     const now=live&&isT&&N>=toMin(l.start)&&N<toMin(l.end);
-    return`<button class="lesson ${now?'now':''} ${l.sub?'':'empty'} ${l.credit?'credit':''} ${l.blocked?'blocked':''}" onclick="editLesson('${d}',${l.i})"><span class="lt">${l.start}<br><small>${l.end}</small></span><span class="lbar" style="background:${l.sub?l.sub.color:'var(--line)'}"></span><span class="lb"><b>${l.sub?esc(l.sub.name):'Ora da definire'}${now?'<em class="live">in corso</em>':''}${l.subst?'<em class="sup">supplenza</em>':l.sup?'<em class="sup">variazione</em>':''}${l.credit?'<em class="sup">credito</em>':''}${l.blocked?`<em class="blk">${esc((l.lim.type||'').toLowerCase())}</em>`:l.partial?`<em class="blk">dalle ${esc(l.lim.notBefore||'')}</em>`:''}</b><small>${l.prof?esc(l.prof.name)+(l.prof.sup?' (supplente)':''):(l.sub?'Docente non impostato':'Tocca per impostare')}${l.orig?' · al posto di '+esc(l.orig.name):''}${l.subst&&l.subst.room?' · '+esc(l.subst.room):''}</small>${l.topic?`<span class="topic">${esc(l.topic)}</span>`:''}</span></button>`;
+    return`<button class="lesson ${now?'now':''} ${l.sub?'':'empty'} ${l.credit?'credit':''} ${l.blocked?'blocked':''}" onclick="editLesson('${d}',${l.i})"><span class="lt">${l.start}<br><small>${l.end}</small></span><span class="lbar" style="background:${l.sub?l.sub.color:'var(--line)'}"></span><span class="lb"><b>${l.sub?esc(l.sub.name):'Ora da definire'}${now?'<em class="live">in corso</em>':''}${l.subst?'<em class="sup">supplenza</em>':l.sup?'<em class="sup">variazione</em>':''}${l.credit?'<em class="sup">credito</em>':''}${l.blocked?`<em class="blk">${esc((l.lim.type||'').toLowerCase())}</em>`:l.partial?`<em class="blk">dalle ${esc(l.lim.notBefore||'')}</em>`:''}</b><small>${l.prof?esc(l.prof.name)+(l.prof.sup?' (supplente)':''):(l.sub?'Docente non impostato':'Tocca per impostare')}${l.co?' + '+esc(l.co.name):''}${l.orig?' · al posto di '+esc(l.orig.name):''}${l.subst&&l.subst.room?' · '+esc(l.subst.room):''}</small>${l.topic?`<span class="topic">${esc(l.topic)}</span>`:''}</span></button>`;
   }).join('')+'</div>';
 }
 function matCard(d,tonight){
@@ -1187,6 +1221,7 @@ function editCell(D,i){
   sheet(`${WDL[D]} · ${s[0]}–${s[1]}`,
     fld('Materia',`<select id="c_sub" onchange="autoProf('c_sub','c_prof')">${subOpts(c.sub)}</select>`)+
     fld('Docente',`<select id="c_prof">${profOpts(c.prof)}</select>`)+
+    fld('Compresenza (laboratorio)',`<select id="c_co">${profOpts(c.co)}</select>`)+
     fld('…oppure nuovo docente',`<input id="c_new" placeholder="es. Prof.ssa Rossi (finisce in Rubrica)">`)+
     fld('Durata del blocco',`<select id="c_rep"><option value="1">Solo quest'ora</option><option value="2">2 ore consecutive</option><option value="3">3 ore consecutive</option><option value="4">4 ore consecutive</option></select>`),
     `<button class="btn" onclick="closeSheet();sub('subjects')">Materie</button><button class="btn pri" onclick="saveCell(${D},${i})">Salva</button>`);
@@ -1196,7 +1231,7 @@ function saveCell(D,i){
   if(nn){const c={id:uid(),name:nn,role:'Docente',sub:sb,phone:'',email:'',note:''};st.contacts.push(c);pr=c.id}
   else if(pr&&sb){const c=conById(pr);if(c&&c.role==='Docente'&&!c.sub)c.sub=sb}
   st.tt[D]=st.tt[D]||[];
-  for(let k=0;k<rep&&i+k<st.settings.slots.length;k++)st.tt[D][i+k]=sb?{sub:sb,prof:pr}:{};
+  for(let k=0;k<rep&&i+k<st.settings.slots.length;k++)st.tt[D][i+k]=sb?(val('c_co')?{sub:sb,prof:pr,co:val('c_co')}:{sub:sb,prof:pr}):{};
   save();closeSheet();render();toast('Orario aggiornato');
 }
 
@@ -2345,6 +2380,7 @@ function impApply(){const R=_imp.res;let n=0;
     else if(k==='absences'){if(!st.att[x.date])st.att[x.date]={status:'absent',reason:limitFor(x.date)?limitFor(x.date).type:'Altro',note:x.note||'da registro'}}
   });
   _imp=null;_impImgs=[];save();render();toast(n+' elementi aggiunti')}
+if(st._ttNew){delete st._ttNew;save();setTimeout(()=>toast('Orario della 1ª M aggiornato (provvisorio dal 21/09)'),900);render()}
 
 </script>
 </body>
