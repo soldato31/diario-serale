@@ -686,7 +686,7 @@ function fmtNum(x){if(x===null||x===undefined||!isFinite(x))return'—';const a=
 function fmtOhm(r){if(r>=1e6)return fmtNum(r/1e6)+' MΩ';if(r>=1e3)return fmtNum(r/1e3)+' kΩ';return fmtNum(r)+' Ω'}
 
 /* ============ UTILITÀ ============ */
-const APP_VER='3.1';
+const APP_VER='3.2';
 const KEY='diarioSerale_v1';
 const WD=['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];
 const WDL=['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
@@ -794,7 +794,7 @@ async function syncNow(quiet){const C=syncCfg();if(!C.token||_syncBusy)return;_s
     const lu=st._upd||0,ru=remote&&remote.upd||0;
     if(remote&&remote.data&&(ru>lu||(C.first&&ru))){const key=st.settings.gemKey,model=st.settings.gemModel;st=migrate(remote.data);st._upd=ru;st.settings.gemKey=key;st.settings.gemModel=model;
       try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}render();if(!quiet)toast('Aggiornato dal Portale/altro dispositivo')}
-    else if(lu>ru||!remote){const u=await fetch('https://api.github.com/gists/'+syncCfg().gist,{method:'PATCH',headers:syncHeaders(),body:JSON.stringify({files:{[SYNC_FILE]:{content:syncPayload()}}})});
+    else if(lu>ru||!remote){const u=await fetch('https://api.github.com/gists/'+syncCfg().gist,{method:'PATCH',headers:syncHeaders(),body:JSON.stringify({files:{[SYNC_FILE]:{content:syncPayload()},'scuola.ics':{content:icsFeed()}}})});
       if(!u.ok)throw new Error('Invio fallito ('+u.status+')');if(!quiet)toast('Sincronizzato ✓')}
     else if(!quiet)toast('Già allineato ✓');
     setSyncCfg({last:new Date().toISOString(),err:'',first:false})}
@@ -805,7 +805,7 @@ function syncCard(){const C=syncCfg();return`<section class="card"><div class="c
   <p class="muted" style="margin-top:0">Diario e Portale (sul Mac) condividono gli stessi dati tramite un Gist <b>privato</b> del tuo GitHub. Serve un token GitHub con il solo permesso <b>gist</b>: crealo su github.com → Settings → Developer settings → Personal access tokens → Tokens (classic) → spunta solo «gist». Incollalo qui e nel Portale.</p>
   ${fld('Token GitHub (resta solo su questo dispositivo)',`<input type="password" value="${C.token?'••••••••':''}" placeholder="ghp_…" onchange="if(!this.value.startsWith('•')){setSyncCfg({token:this.value.trim(),gist:'',first:true});syncNow()}">`)}
   <div class="row"><button class="btn pri" onclick="syncNow()">Sincronizza ora</button>${C.token?`<button class="btn" onclick="localStorage.removeItem('ds_sync');render()">Scollega</button>`:''}</div>
-  <p class="hint">${C.last?'Ultima sincronizzazione: '+new Date(C.last).toLocaleString('it'):'Mai sincronizzato.'}${C.err?' · ⚠️ '+esc(C.err):''}${C.gist?' · gist '+esc(C.gist.slice(0,7)):''}</p></section>`}
+  ${C.gist?`<p class="hint">📅 <b>Calendario con promemoria</b> (compiti e verifiche): aggiungilo a Google Calendar (Altri calendari → Da URL) e al Calendario del Mac (Archivio → Nuova iscrizione):<br><input readonly value="${icsUrl()}" onclick="this.select()" style="width:100%"></p>`:''}<p class="hint">${C.last?'Ultima sincronizzazione: '+new Date(C.last).toLocaleString('it'):'Mai sincronizzato.'}${C.err?' · ⚠️ '+esc(C.err):''}${C.gist?' · gist '+esc(C.gist.slice(0,7)):''}</p></section>`}
 
 const subById=id=>id?st.subjects.find(x=>x.id===id):null;
 const conById=id=>id?st.contacts.find(x=>x.id===id):null;
@@ -1320,7 +1320,7 @@ function delAtt(d){if(!confirm('Eliminare la registrazione di '+fmtShort(d)+'?')
 VIEWS.more=()=>{
   hdr(st.settings.school,'Altro');
   const t=today(),open=st.tasks.filter(x=>!x.done).length,app=st.notes.filter(n=>n.type==='appt'&&n.date>=t).length,S=stats();
-  const T=[['att','✅','Presenze',S.sch?S.pct.toFixed(0)+'% frequenza':'check-in e assenze'],['tasks','📝','Compiti',open+' da fare'],['grades','📈','Voti e pagella',st.grades.length+' voti'],['journal','📓','Diario di bordo','riflessione settimanale'],['contacts','📇','Rubrica',st.contacts.length+' contatti'],['files','🗂️','Archivio','file, dispense, foto'],['notes','🗒️','Note e appuntamenti',app+' in arrivo'],['subjects','📚','Materie',st.subjects.length+' materie'],['shifts','🏭','Turni di lavoro',st.settings.shiftCycle.length?'rotazione attiva':'da impostare'],['limits','🩺','Malattia e permessi',(st.limits||[]).some(l=>l.to>=today())?'attivo':'nessuno'],['scr','🏅','Scrutini',(st.scr||[]).length+' inseriti'],['classroom','🎓','Google Classroom',st.cr.synced?'sincronizzato':'da collegare'],['imp','✦','Importa smart','da registro, foto, testo'],['settings','⚙️','Impostazioni','orari, AI, backup']];
+  const T=[['att','✅','Presenze',S.sch?S.pct.toFixed(0)+'% frequenza':'check-in e assenze'],['tasks','📝','Compiti',open+' da fare'],['verifiche','🎯','Verifiche',st.tasks.filter(x=>(x.type==='Verifica'||x.type==='Interrogazione')&&!x.done&&x.due>=today()).length+' in arrivo'],['grades','📈','Voti e pagella',st.grades.length+' voti'],['journal','📓','Diario di bordo','riflessione settimanale'],['contacts','📇','Rubrica',st.contacts.length+' contatti'],['files','🗂️','Archivio','file, dispense, foto'],['notes','🗒️','Note e appuntamenti',app+' in arrivo'],['subjects','📚','Materie',st.subjects.length+' materie'],['shifts','🏭','Turni di lavoro',st.settings.shiftCycle.length?'rotazione attiva':'da impostare'],['limits','🩺','Malattia e permessi',(st.limits||[]).some(l=>l.to>=today())?'attivo':'nessuno'],['scr','🏅','Scrutini',(st.scr||[]).length+' inseriti'],['classroom','🎓','Google Classroom',st.cr.synced?'sincronizzato':'da collegare'],['imp','✦','Importa smart','da registro, foto, testo'],['settings','⚙️','Impostazioni','orari, AI, backup']];
   let h=`<div class="tiles">${T.map(x=>`<button class="tile" onclick="sub('${x[0]}')"><span>${x[1]}</span><b>${x[2]}</b><small>${x[3]}</small></button>`).join('')}</div>`;
   h+=`<div class="tiles mt">${st.settings.registro?`<a class="tile" href="${esc(st.settings.registro)}" target="_blank" rel="noopener"><span>🏫</span><b>Registro elettronico</b><small>apri</small></a>`:`<button class="tile" onclick="sub('settings')"><span>🏫</span><b>Registro elettronico</b><small>imposta il link</small></button>`}<button class="tile" onclick="exportData(true)"><span>💾</span><b>Backup</b><small>${st.settings.lastBackup?'ultimo '+fmtShort(st.settings.lastBackup):'mai fatto'}</small></button></div>`;
   return h;
@@ -2163,9 +2163,60 @@ function notifCheck(){
   const L=schedWindow(t).filter(l=>l.sub);
   if(L.length&&!(st.att[t]&&st.att[t].status!=='present')){const s=toMin(L[0].start);if(N>=s-90&&N<s){const m=matsFor(t).filter(x=>!x.ok);if(m.length)once('bag'+t,()=>notify('Borsa per stasera','Mancano: '+m.slice(0,4).map(x=>x.name).join(', ')+(m.length>4?'…':'')))}}
   if(N>=21*60+50||N<60){const tm=addD(t,1),d=st.tasks.filter(x=>!x.done&&x.due===tm);if(d.length)once('due'+t,()=>notify('Per domani','Da consegnare: '+d.map(x=>x.title).join(', ')))}
+  if(N>=18*60&&N<23*60){const v=st.tasks.filter(x=>!x.done&&(x.type==='Verifica'||x.type==='Interrogazione')&&x.due===addD(t,1));if(v.length)once('ver'+t,()=>notify('Domani verifica!',v.map(x=>{const s=subById(x.sub);return(s?s.name+': ':'')+x.title}).join(', ')))}
+  if(N>=21*60+45&&rendDays().includes(t))once('rend'+t,()=>notify('Com\'è andata stasera?','Apri il diario: presenza, argomenti, interrogazioni.'));
   if(N>=12*60&&N<14*60){const n=cardsDue().length;if(n>=5)once('cards'+t,()=>notify('Pausa pranzo?',n+' flashcard ti aspettano: 10 minuti.'))}
   const ks=Object.keys(st.notified);if(ks.length>60){ks.sort().slice(0,ks.length-40).forEach(k=>delete st.notified[k])}
 }
+
+
+/* ============ RENDICONTO DELLA SERATA (chiesto all'apertura) ============ */
+function rendDays(){const t=today(),out=[];let d=addD(t,-7);if(st.settings.start&&d<st.settings.start)d=st.settings.start;
+  while(d<=t){if(isWeekday(d)&&schedMin(d)&&!(st.asked||{})[d]&&!st.att[d]){const L=lessonsFor(d).filter(l=>l.sub&&!l.credit);const started=d<t||nowMin()>=toMin(L[0]?.start||'16:45');if(started)out.push(d)}d=addD(d,1)}return out}
+function rendAuto(){if(sheetOpen&&sheetOpen())return;const D=rendDays();if(D.length)rendiconto(D[D.length-1],D.length)}
+function rendiconto(d,n){d=d||today();const L=lessonsFor(d).filter(l=>l.sub&&!l.credit&&!l.blocked);const r=st.att[d]||{};
+  const first=L[0]?L[0].start:'16:45',last=L.length?L[L.length-1].end:'21:45';
+  sheet('Com\'è andata '+(d===today()?'stasera':fmtLong(d))+'?',
+  `${n>1?`<p class="hint">Ci sono ${n} serate da registrare: parto dalla più recente.</p>`:''}
+  <h4>1 · Presenza</h4>${fld('Stasera ero',`<select id="rd_st"><option value="present" ${r.status!=='absent'&&r.status!=='off'?'selected':''}>Presente</option><option value="absent" ${r.status==='absent'?'selected':''}>Assente</option><option value="fad" ${r.status==='fad'?'selected':''}>A distanza</option><option value="off" ${r.status==='off'?'selected':''}>Niente lezione</option></select>`)}
+  <div class="f2">${fld('Entrata',`<input type="time" id="rd_in" value="${esc(r.in||first)}">`)}${fld('Uscita',`<input type="time" id="rd_out" value="${esc(r.out||last)}">`)}</div>
+  ${fld('Motivo assenza (se assente)',`<select id="rd_re">${opts(REASONS,r.reason||'Lavoro')}</select>`)}
+  <h4>2 · Argomenti trattati (su cui studiare)</h4>${L.map(l=>`${fld(l.start+' '+esc(l.sub.name),`<input id="rd_t${l.i}" value="${esc(l.topic)}" placeholder="argomento spiegato">`)}`).join('')||'<p class="hint">Nessuna lezione.</p>'}
+  <h4>3 · Col prof</h4><p class="hint" style="margin-top:0">Interrogato? Verifica fatta o annunciata? Compiti? Aggiungi una riga per ciascuno.</p><div id="rd_ev"></div>
+  <div class="row"><button class="btn sm" onclick="rdRow('Interrogazione')">🗣️ Interrogato</button><button class="btn sm" onclick="rdRow('Verifica svolta')">📝 Verifica fatta</button><button class="btn sm" onclick="rdRow('Verifica annunciata')">📅 Verifica annunciata</button><button class="btn sm" onclick="rdRow('Compito')">📌 Compiti</button></div>`,
+  `<button class="btn left" onclick="(st.asked=st.asked||{})['${d}']=1;save();closeSheet();rendAuto()">Dopo</button><button class="btn pri" onclick="rdSave('${d}')">Salva</button>`);
+  window._rdL=L.map(l=>l.i)}
+function rdRow(k){const box=$('#rd_ev');const i=box.children.length;const subs=subOpts('');const fut=k==='Verifica annunciata'||k==='Compito';
+  box.insertAdjacentHTML('beforeend',`<div class="card" data-k="${k}" style="padding:8px;margin:6px 0"><b>${k}</b><div class="f2">${fld('Materia',`<select class="rd_s">${subs}</select>`)}${fut?fld(k==='Compito'?'Entro il':'Data verifica',`<input type="date" class="rd_d" value="${addD(today(),7)}">`):fld('Voto (se c\'è)',`<input class="rd_v" inputmode="decimal" placeholder="es. 6,5">`)}</div>${fld(k==='Compito'?'Cosa':'Argomento / note',`<input class="rd_n">`)}</div>`)}
+function rdSave(d){const stt=val('rd_st');st.att[d]={status:stt,in:stt==='present'?val('rd_in'):'',out:stt==='present'?val('rd_out'):'',reason:stt==='absent'?val('rd_re'):'',note:''};
+  (window._rdL||[]).forEach(i=>{const v=val('rd_t'+i);if(v){st.diary[d]=st.diary[d]||{};st.diary[d][i]=Object.assign(st.diary[d][i]||{},{topic:v})}});
+  document.querySelectorAll('#rd_ev [data-k]').forEach(c=>{const k=c.dataset.k,sid=c.querySelector('.rd_s').value,n=c.querySelector('.rd_n').value.trim();
+    if(k==='Verifica annunciata'||k==='Compito'){const due=c.querySelector('.rd_d').value;st.tasks.push({id:uid(),title:n||(k==='Compito'?'Compito':'Verifica'),type:k==='Compito'?'Compito':'Verifica',sub:sid,assigned:d,due,desc:'',done:false,topic:k==='Compito'?'':n})}
+    else{const v=parseGrade(c.querySelector('.rd_v').value);const typ=k==='Interrogazione'?'Orale':'Scritto';
+      if(!isNaN(v))st.grades.push({id:uid(),sub:sid,v,date:d,type:typ,w:1,note:n});
+      st.ev=st.ev||[];st.ev.push({id:uid(),d,sub:sid,kind:k,note:n,v:isNaN(v)?'':v})}});
+  (st.asked=st.asked||{})[d]=1;save();closeSheet();render();toast('Registrato ✓');setTimeout(rendAuto,600)}
+
+/* ============ VERIFICHE ============ */
+VIEWS.verifiche=()=>{hdr('Altro','Verifiche e interrogazioni','+ Verifica','rdNewVer()',true);const t=today();
+  const V=st.tasks.filter(x=>x.type==='Verifica'||x.type==='Interrogazione');const fut=V.filter(x=>!x.done&&x.due>=t).sort((a,b)=>a.due<b.due?-1:1),past=V.filter(x=>x.done||x.due<t).sort((a,b)=>a.due<b.due?1:-1);
+  const row=x=>{const s=subById(x.sub),g=st.grades.find(g=>g.sub===x.sub&&g.date===x.due);const dd=x.due?daysBetween(t,x.due):'';
+    return`<div class="li"><span class="dot" style="background:${s?s.color:'var(--line)'}"></span><div class="grow"><b>${esc(x.type)} · ${esc(s?s.name:'')}</b><br><small>${x.due?fmtLong(x.due):'senza data'}${dd!==''&&dd>=0?' · tra '+dd+' g':''} · ${esc(x.topic||x.title)}</small></div>${g?`<b style="color:${gcol(g.v)}">${String(g.v).replace('.',',')}</b>`:''}<button class="btn sm" onclick="editTask('${x.id}')">›</button></div>`};
+  return`<section class="card"><div class="card-h"><h3>In arrivo (${fut.length})</h3></div>${fut.map(row).join('')||'<p class="empty-s">Nessuna verifica in programma.</p>'}</section>
+  <section class="card"><div class="card-h"><h3>Svolte</h3><button class="btn sm" onclick="sub('grades')">📈 Voti</button></div>${past.map(row).join('')||'<p class="empty-s">Ancora nessuna.</p>'}</section>`};
+function rdNewVer(){sheet('Nuova verifica',fld('Materia',`<select id="nv_s">${subOpts('')}</select>`)+`<div class="f2">${fld('Tipo',`<select id="nv_t">${opts(['Verifica','Interrogazione'],'Verifica')}</select>`)}${fld('Data',`<input type="date" id="nv_d" value="${addD(today(),7)}">`)}</div>`+fld('Argomenti',`<input id="nv_a">`),
+  `<button class="btn pri" onclick="st.tasks.push({id:uid(),title:val('nv_a')||val('nv_t'),type:val('nv_t'),sub:val('nv_s'),assigned:today(),due:val('nv_d'),desc:'',done:false,topic:val('nv_a')});save();closeSheet();render()">Salva</button>`)}
+
+/* ============ CALENDARIO SINCRONIZZATO (scuola.ics nel gist, con promemoria) ============ */
+function icsFeed(){const S=st.settings,E=s=>String(s||'').replace(/[\;,]/g,m=>'\\'+m).replace(/\n/g,'\\n'),stamp=new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z';
+  const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Diario Serale//IT','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:Scuola serale – compiti e verifiche','X-WR-TIMEZONE:Europe/Rome','REFRESH-INTERVAL;VALUE=DURATION:PT1H','X-PUBLISHED-TTL:PT1H'];
+  const al=(m,txt)=>['BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+E(txt),'TRIGGER:'+m,'END:VALARM'];
+  st.tasks.filter(x=>!x.done&&x.due).forEach(x=>{const s=subById(x.sub),ver=x.type==='Verifica'||x.type==='Interrogazione',D=x.due.replace(/-/g,'');
+    // evento alle 16:00 del giorno di scadenza; promemoria il giorno prima alle 18 (e 3 giorni prima per le verifiche)
+    L.push('BEGIN:VEVENT','UID:ds-'+x.id+'@diarioserale','DTSTAMP:'+stamp,'DTSTART:'+D+'T150000Z','DTEND:'+D+'T153000Z','SUMMARY:'+E((ver?'⚠️ '+x.type:'📌 '+(x.type||'Compito'))+(s?' '+s.name:'')+': '+x.title),'DESCRIPTION:'+E(x.desc||''),...al('-PT22H',(ver?'Domani ':'Per domani: ')+x.title),...(ver?al('-P3D','Tra 3 giorni: '+x.type+' '+(s?s.name:'')):[]),'END:VEVENT')});
+  st.notes.filter(a=>a.type==='appt'&&a.date&&a.date>=addD(today(),-7)).forEach(a=>{const D=a.date.replace(/-/g,'');L.push('BEGIN:VEVENT','UID:ds-a-'+a.id+'@diarioserale','DTSTAMP:'+stamp,...(a.time?['DTSTART;TZID=Europe/Rome:'+D+'T'+a.time.replace(':','')+'00','DTEND;TZID=Europe/Rome:'+D+'T'+hm(toMin(a.time)+60).replace(':','')+'00']:['DTSTART;VALUE=DATE:'+D,'DTEND;VALUE=DATE:'+addD(a.date,1).replace(/-/g,'')]),'SUMMARY:'+E(a.title),'LOCATION:'+E(a.place),...al('-PT2H',a.title),'END:VEVENT')});
+  L.push('END:VCALENDAR');return L.join('\r\n')}
+function icsUrl(){const g=syncCfg().gist;return g?'https://gist.githubusercontent.com/soldato31/'+g+'/raw/scuola.ics':''}
 
 /* ============ BACKUP ============ */
 function abToB64(buf){let s='';const b=new Uint8Array(buf);for(let i=0;i<b.length;i+=0x8000)s+=String.fromCharCode.apply(null,b.subarray(i,i+0x8000));return btoa(s)}
@@ -2419,7 +2470,7 @@ function impApply(){const R=_imp.res;let n=0;
     else if(k==='absences'){if(!st.att[x.date])st.att[x.date]={status:'absent',reason:limitFor(x.date)?limitFor(x.date).type:'Altro',note:x.note||'da registro'}}
   });
   _imp=null;_impImgs=[];save();render();toast(n+' elementi aggiunti')}
-syncNow(true);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')syncNow(true)});
+syncNow(true).then(()=>setTimeout(rendAuto,800));document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){syncNow(true).then(()=>setTimeout(rendAuto,800))}});
 if(st._ttNew){delete st._ttNew;save();setTimeout(()=>toast('Orario della 2ª M aggiornato (dal 09/11/2026)'),900);render()}
 
 </script>
