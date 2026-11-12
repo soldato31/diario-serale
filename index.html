@@ -9,6 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Diario Serale">
 <link rel="manifest" href="manifest.json">
+<script src="calc.js"></script>
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>Diario Serale</title>
@@ -1954,10 +1955,13 @@ function pathCard(){const P=pace(),cy=+st.settings.curYear||1,ty=+st.goal.year||
 /* ============ VALIGIA DEGLI ATTREZZI ============ */
 VIEWS.tools=()=>{
   hdr('Valigia degli attrezzi','Strumenti tecnici');
-  const T=[['conv','🔁','Convertitore','15 grandezze'],['solver','ƒ','Risolutore formule',FORMULAS.length+' formule'],['ptable','⚛︎','Tavola periodica','118 elementi'],['molar','M','Massa molare','da formula chimica'],['ohm','Ω','Legge di Ohm','V · I · R · P'],['rescol','▥','Codice colori','resistenze 4/5 bande'],['rpm','⟳','Giri al minuto','tornio, fresa, trapano'],['formulas','∑','Formulario','tutte le materie']];
+  const T=[['calc','🧮','Calcolatrice','scientifica, equazioni, esercizi'],['conv','🔁','Convertitore','15 grandezze'],['solver','ƒ','Risolutore formule',FORMULAS.length+' formule'],['ptable','⚛︎','Tavola periodica','118 elementi'],['molar','M','Massa molare','da formula chimica'],['ohm','Ω','Legge di Ohm','V · I · R · P'],['rescol','▥','Codice colori','resistenze 4/5 bande'],['rpm','⟳','Giri al minuto','tornio, fresa, trapano'],['formulas','∑','Formulario','tutte le materie']];
   return`<div class="tiles">${T.map(x=>`<button class="tile" onclick="openV('${x[0]}',null,'${x[0]==='formulas'?'tools':'tools'}')"><span class="tic">${x[1]}</span><b>${x[2]}</b><small>${x[3]}</small></button>`).join('')}</div>
   <section class="card mt"><div class="card-h"><h3>Tabelle</h3></div>${Object.entries(TABLES).map(([k,t])=>`<div class="li" style="cursor:pointer" onclick="openV('table','${k}','tools')"><span class="av">▦</span><div class="grow"><b>${esc(t.n)}</b><small>${t.r.length} righe</small></div><span class="chev">›</span></div>`).join('')}</section>`;
 };
+/* ---- calcolatrice (calc.js, condivisa col Portale) ---- */
+function calcTopics(){const out=[];const t=today();Object.keys(st.diary).filter(d=>d>=addD(t,-30)).forEach(d=>Object.values(st.diary[d]||{}).forEach(o=>{if(o&&o.topic)out.push(o.topic)}));(st.ext||[]).forEach(x=>x.t&&out.push(x.t));(st.cr.mats||[]).forEach(m=>m.title&&out.push(m.title));(st.tasks||[]).filter(x=>!x.done).forEach(x=>out.push(x.title+' '+(x.topic||'')));return out}
+VIEWS.calc=()=>{hdr('Valigia degli attrezzi','Calcolatrice');setTimeout(()=>{const el=document.getElementById('calcBox');if(el&&window.Calc)Calc.mount(el,{topics:calcTopics})},0);return window.Calc?'<section class="card"><div id="calcBox"></div></section>':'<section class="card"><p class="empty-s">Calcolatrice non caricata: ricarica l\'app.</p></section>'};
 /* ---- convertitore ---- */
 let cv={g:'lunghezza',from:'mm',to:'in (pollice)',v:'1'};
 VIEWS.conv=()=>{
