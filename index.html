@@ -687,7 +687,7 @@ function fmtNum(x){if(x===null||x===undefined||!isFinite(x))return'—';const a=
 function fmtOhm(r){if(r>=1e6)return fmtNum(r/1e6)+' MΩ';if(r>=1e3)return fmtNum(r/1e3)+' kΩ';return fmtNum(r)+' Ω'}
 
 /* ============ UTILITÀ ============ */
-const APP_VER='3.2';
+const APP_VER='3.6';
 const KEY='diarioSerale_v1';
 const WD=['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];
 const WDL=['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
@@ -770,7 +770,7 @@ function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.v)retu
 let st=load();
 let _idbT=null,_ver=0;
 function save(){
-  _ver++;st._upd=Date.now();syncSoon();
+  _ver++;if(!_booting||!syncCfg().token){st._upd=Date.now();syncSoon()}
   try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){toast('Memoria piena: fai un backup')}
   clearTimeout(_idbT);_idbT=setTimeout(()=>{kvPut('state',JSON.stringify(st)).catch(()=>{});kvPut('snap-'+today(),JSON.stringify(st)).catch(()=>{})},1500);
 }
@@ -787,20 +787,34 @@ async function syncFindGist(){const r=await fetch('https://api.github.com/gists?
   const L=await r.json();const g=L.find(x=>x.files&&x.files[SYNC_FILE]);if(g)return g.id;
   const c=await fetch('https://api.github.com/gists',{method:'POST',headers:syncHeaders(),body:JSON.stringify({description:'Diario Serale + Portale Scuola (sync)',public:false,files:{[SYNC_FILE]:{content:syncPayload()}}})});
   if(!c.ok)throw new Error('Creazione gist fallita ('+c.status+')');return(await c.json()).id}
+// Unione sicura: parte dai dati remoti e aggiunge tutto ciò che c'è solo in locale (niente si perde).
+function dsMerge(R,L){const M=JSON.parse(JSON.stringify(R));
+  const blank=v=>v===undefined||v===null||v==='';
+  M.diary=M.diary||{};Object.entries(L.diary||{}).forEach(([d,day])=>{M.diary[d]=M.diary[d]||{};Object.entries(day||{}).forEach(([i,e])=>{const r=M.diary[d][i];if(!r){M.diary[d][i]=e;return}if(e&&typeof e==='object')Object.entries(e).forEach(([k,v])=>{if(blank(r[k])&&!blank(v))r[k]=v})})});
+  ['att','asked','journal','mat','shifts','sylSt','sylAdd','sylDel','mast','lvl'].forEach(k=>{if(L[k]&&typeof L[k]==='object'){M[k]=M[k]||{};Object.entries(L[k]).forEach(([x,v])=>{if(!(x in M[k]))M[k][x]=v})}});
+  ['tasks','grades','notes','cards','ev','scr','limits','contacts','subjects','myf','pomos','doubts','ext'].forEach(k=>{if(!Array.isArray(L[k]))return;M[k]=Array.isArray(M[k])?M[k]:[];const ids=new Map(M[k].map(x=>[x&&x.id,x]));
+    L[k].forEach(x=>{if(!x)return;const r=x.id&&ids.get(x.id);if(!r){if(!x.id&&M[k].some(y=>JSON.stringify(y)===JSON.stringify(x)))return;M[k].push(x)}else if(k==='tasks'&&x.done&&!r.done){r.done=true;r.doneAt=x.doneAt||r.doneAt}})});
+  return M}
+var _booting=true;
 async function syncNow(quiet){const C=syncCfg();if(!C.token||_syncBusy)return;_syncBusy=true;
   try{if(!C.gist){setSyncCfg({gist:await syncFindGist()})}
     const r=await fetch('https://api.github.com/gists/'+syncCfg().gist,{headers:syncHeaders(),cache:'no-store'});if(!r.ok)throw new Error('Gist non raggiungibile ('+r.status+')');
     const g=await r.json();const f=g.files[SYNC_FILE];let remote=null;
     if(f){let txt=f.content;if(f.truncated)txt=await(await fetch(f.raw_url)).text();try{remote=JSON.parse(txt)}catch(e){}}
-    const lu=st._upd||0,ru=remote&&remote.upd||0;
-    if(remote&&remote.data&&(ru>lu||(C.first&&ru))){const key=st.settings.gemKey,model=st.settings.gemModel;st=migrate(remote.data);st._upd=ru;st.settings.gemKey=key;st.settings.gemModel=model;
-      try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}render();if(!quiet)toast('Aggiornato dal Portale/altro dispositivo')}
-    else if(lu>ru||!remote){const u=await fetch('https://api.github.com/gists/'+syncCfg().gist,{method:'PATCH',headers:syncHeaders(),body:JSON.stringify({files:{[SYNC_FILE]:{content:syncPayload()},'scuola.ics':{content:icsFeed()}}})});
-      if(!u.ok)throw new Error('Invio fallito ('+u.status+')');if(!quiet)toast('Sincronizzato ✓')}
-    else if(!quiet)toast('Già allineato ✓');
-    setSyncCfg({last:new Date().toISOString(),err:'',first:false})}
+    const base=C.base||0,lu=st._upd||0,ru=remote&&remote.upd||0,localDirty=lu>base,remoteNew=remote&&remote.data&&ru>base;
+    const key=st.settings.gemKey,model=st.settings.gemModel;let push=false;
+    if(remote&&remote.data&&C.first){st=migrate(remote.data);st._upd=ru}
+    else if(remoteNew&&localDirty){st=migrate(dsMerge(remote.data,st));st._upd=Date.now();push=true}
+    else if(remoteNew){st=migrate(remote.data);st._upd=ru}
+    else if(localDirty||!remote){push=true}
+    st.settings.gemKey=key;st.settings.gemModel=model;
+    if(remoteNew||C.first){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}if(!sheetOpen())render();if(!quiet)toast('Aggiornato dagli altri dispositivi')}
+    if(push){const u=await fetch('https://api.github.com/gists/'+syncCfg().gist,{method:'PATCH',headers:syncHeaders(),body:JSON.stringify({files:{[SYNC_FILE]:{content:syncPayload()},'scuola.ics':{content:icsFeed()}}})});
+      if(!u.ok)throw new Error('Invio fallito ('+u.status+')');try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}if(!quiet)toast('Sincronizzato ✓')}
+    else if(!quiet&&!remoteNew)toast('Già allineato ✓');
+    setSyncCfg({last:new Date().toISOString(),err:'',first:false,base:st._upd||0})}
   catch(e){setSyncCfg({err:String(e.message||e)});if(!quiet)toast('Sync: '+(e.message||e))}
-  finally{_syncBusy=false}}
+  finally{_syncBusy=false;_booting=false}}
 function syncSoon(){if(!syncCfg().token)return;clearTimeout(_syncT);_syncT=setTimeout(()=>syncNow(true),8000)}
 function syncCard(){const C=syncCfg();return`<section class="card"><div class="card-h"><h3>🔄 Sincronizzazione con il Portale Scuola</h3></div>
   <p class="muted" style="margin-top:0">Diario e Portale (sul Mac) condividono gli stessi dati tramite un Gist <b>privato</b> del tuo GitHub. Serve un token GitHub con il solo permesso <b>gist</b>: crealo su github.com → Settings → Developer settings → Personal access tokens → Tokens (classic) → spunta solo «gist». Incollalo qui e nel Portale.</p>
@@ -2474,7 +2488,7 @@ function impApply(){const R=_imp.res;let n=0;
     else if(k==='absences'){if(!st.att[x.date])st.att[x.date]={status:'absent',reason:limitFor(x.date)?limitFor(x.date).type:'Altro',note:x.note||'da registro'}}
   });
   _imp=null;_impImgs=[];save();render();toast(n+' elementi aggiunti')}
-syncNow(true).then(()=>setTimeout(rendAuto,800));document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){syncNow(true).then(()=>setTimeout(rendAuto,800))}});
+syncNow(true).then(()=>setTimeout(rendAuto,800));setInterval(()=>{if(document.visibilityState==='visible'&&!sheetOpen())syncNow(true)},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){syncNow(true).then(()=>setTimeout(rendAuto,800))}});
 if(st._ttNew){delete st._ttNew;save();setTimeout(()=>toast('Orario della 2ª M aggiornato (dal 09/11/2026)'),900);render()}
 
 </script>
