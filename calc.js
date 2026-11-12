@@ -164,41 +164,84 @@
 
   /* ================= FORMULARIO RISOLVIBILE ================= */
   // [materia, nome, formula "y = espressione", {variabile: [descrizione, unità]}]
+  // [materia, nome, formula, {variabile: [descrizione, unità, tabella?]}, [formule inverse]]
   const FORM = [
-    ['Matematica', 'Teorema di Pitagora', 'c = sqrt(a^2+b^2)', { c: ['ipotenusa', ''], a: ['cateto a', ''], b: ['cateto b', ''] }],
-    ['Matematica', 'Area del cerchio', 'A = pi*r^2', { A: ['area', 'm²'], r: ['raggio', 'm'] }],
-    ['Matematica', 'Percentuale', 'p = x*q/100', { p: ['parte', ''], x: ['totale', ''], q: ['percentuale', '%'] }],
-    ['Matematica', 'Proporzione a:b = c:d', 'd = b*c/a', { d: ['quarto termine', ''], a: ['a', ''], b: ['b', ''], c: ['c', ''] }],
-    ['Matematica', 'Volume del cilindro', 'V = pi*r^2*h', { V: ['volume', 'm³'], r: ['raggio', 'm'], h: ['altezza', 'm'] }],
-    ['Fisica', 'Velocità media (MRU)', 'v = s/t', { v: ['velocità', 'm/s'], s: ['spazio', 'm'], t: ['tempo', 's'] }],
-    ['Fisica', 'Accelerazione', 'a = (v - v0)/t', { a: ['accelerazione', 'm/s²'], v: ['velocità finale', 'm/s'], v0: ['velocità iniziale', 'm/s'], t: ['tempo', 's'] }],
-    ['Fisica', 'Spazio nel moto accelerato', 's = v0*t + a*t^2/2', { s: ['spazio', 'm'], v0: ['velocità iniziale', 'm/s'], t: ['tempo', 's'], a: ['accelerazione', 'm/s²'] }],
-    ['Fisica', '2ª legge di Newton', 'F = m*a', { F: ['forza', 'N'], m: ['massa', 'kg'], a: ['accelerazione', 'm/s²'] }],
-    ['Fisica', 'Forza peso', 'P = m*9.81', { P: ['peso', 'N'], m: ['massa', 'kg'] }],
-    ['Fisica', 'Densità', 'd = m/V', { d: ['densità', 'kg/m³'], m: ['massa', 'kg'], V: ['volume', 'm³'] }],
-    ['Fisica', 'Pressione', 'p = F/S', { p: ['pressione', 'Pa'], F: ['forza', 'N'], S: ['superficie', 'm²'] }],
-    ['Fisica', 'Pressione idrostatica (Stevino)', 'p = d*9.81*h', { p: ['pressione', 'Pa'], d: ['densità liquido', 'kg/m³'], h: ['profondità', 'm'] }],
-    ['Fisica', 'Lavoro', 'L = F*s', { L: ['lavoro', 'J'], F: ['forza', 'N'], s: ['spostamento', 'm'] }],
-    ['Fisica', 'Energia cinetica', 'E = m*v^2/2', { E: ['energia', 'J'], m: ['massa', 'kg'], v: ['velocità', 'm/s'] }],
-    ['Fisica', 'Energia potenziale', 'E = m*9.81*h', { E: ['energia', 'J'], m: ['massa', 'kg'], h: ['altezza', 'm'] }],
-    ['Fisica', 'Potenza', 'P = L/t', { P: ['potenza', 'W'], L: ['lavoro', 'J'], t: ['tempo', 's'] }],
-    ['Fisica', 'Legge di Hooke', 'F = k*x', { F: ['forza', 'N'], k: ['costante elastica', 'N/m'], x: ['allungamento', 'm'] }],
-    ['Fisica', 'Calore', 'Q = m*cs*dT', { Q: ['calore', 'J'], m: ['massa', 'kg'], cs: ['calore specifico', 'J/(kg·K)'], dT: ['ΔT', 'K'] }],
-    ['Fisica', 'Legge di Ohm', 'V = R*I', { V: ['tensione', 'V'], R: ['resistenza', 'Ω'], I: ['corrente', 'A'] }],
-    ['Fisica', 'Errore relativo', 'er = ea/x', { er: ['errore relativo', ''], ea: ['errore assoluto', ''], x: ['valore medio', ''] }],
-    ['Chimica', 'Moli', 'n = m/M', { n: ['moli', 'mol'], m: ['massa', 'g'], M: ['massa molare', 'g/mol'] }],
-    ['Chimica', 'Numero di particelle', 'N = n*6.022e23', { N: ['particelle', ''], n: ['moli', 'mol'] }],
-    ['Chimica', 'Molarità', 'C = n/V', { C: ['molarità', 'mol/L'], n: ['moli', 'mol'], V: ['volume', 'L'] }],
-    ['Chimica', 'Diluizione', 'C2 = C1*V1/V2', { C2: ['conc. finale', 'mol/L'], C1: ['conc. iniziale', 'mol/L'], V1: ['volume iniziale', 'L'], V2: ['volume finale', 'L'] }],
-    ['Chimica', 'Gas perfetti', 'P = n*0.0821*T/V', { P: ['pressione', 'atm'], n: ['moli', 'mol'], T: ['temperatura', 'K'], V: ['volume', 'L'] }],
-    ['Chimica', 'pH', 'pH = -log(H)', { pH: ['pH', ''], H: ['[H⁺]', 'mol/L'] }],
-    ['Chimica', 'Neutroni', 'N = A - Z', { N: ['neutroni', ''], A: ['numero di massa', ''], Z: ['numero atomico', ''] }],
-    ['Chimica', 'Percentuale in massa', 'p = ms/mt*100', { p: ['% m/m', '%'], ms: ['massa soluto', 'g'], mt: ['massa soluzione', 'g'] }],
-    ['Meccanica', 'Velocità di taglio', 'Vt = pi*D*n/1000', { Vt: ['velocità di taglio', 'm/min'], D: ['diametro', 'mm'], n: ['giri', 'giri/min'] }],
-    ['Meccanica', 'Momento torcente', 'Mt = 9550*P/n', { Mt: ['momento', 'N·m'], P: ['potenza', 'kW'], n: ['giri', 'giri/min'] }],
-    ['Meccanica', 'Tensione normale', 's = N/A', { s: ['σ', 'N/mm²'], N: ['forza', 'N'], A: ['sezione', 'mm²'] }],
-    ['Meccanica', 'Rapporto di trasmissione', 'i = z2/z1', { i: ['rapporto', ''], z2: ['denti condotta', ''], z1: ['denti motrice', ''] }],
+    ['Matematica', 'Teorema di Pitagora', 'c = sqrt(a^2+b^2)', { c: ['ipotenusa', ''], a: ['cateto a', ''], b: ['cateto b', ''] }, ['c = √(a² + b²)', 'a = √(c² − b²)', 'b = √(c² − a²)']],
+    ['Matematica', 'Area del rettangolo', 'A = b*h', { A: ['area', 'm²'], b: ['base', 'm'], h: ['altezza', 'm'] }, ['A = b · h', 'b = A / h', 'h = A / b']],
+    ['Matematica', 'Area del triangolo', 'A = b*h/2', { A: ['area', 'm²'], b: ['base', 'm'], h: ['altezza', 'm'] }, ['A = b · h / 2', 'b = 2A / h', 'h = 2A / b']],
+    ['Matematica', 'Area del trapezio', 'A = (B+b)*h/2', { A: ['area', 'm²'], B: ['base maggiore', 'm'], b: ['base minore', 'm'], h: ['altezza', 'm'] }, ['A = (B + b) · h / 2', 'h = 2A / (B + b)', 'B = 2A / h − b', 'b = 2A / h − B']],
+    ['Matematica', 'Circonferenza', 'C = 2*pi*r', { C: ['circonferenza', 'm'], r: ['raggio', 'm'] }, ['C = 2πr', 'r = C / (2π)']],
+    ['Matematica', 'Area del cerchio', 'A = pi*r^2', { A: ['area', 'm²'], r: ['raggio', 'm'] }, ['A = πr²', 'r = √(A / π)']],
+    ['Matematica', 'Volume del parallelepipedo', 'V = a*b*c', { V: ['volume', 'm³'], a: ['lunghezza', 'm'], b: ['larghezza', 'm'], c: ['altezza', 'm'] }, ['V = a · b · c', 'a = V / (b · c)', 'b = V / (a · c)', 'c = V / (a · b)']],
+    ['Matematica', 'Volume del cilindro', 'V = pi*r^2*h', { V: ['volume', 'm³'], r: ['raggio', 'm'], h: ['altezza', 'm'] }, ['V = πr²h', 'h = V / (πr²)', 'r = √(V / (πh))']],
+    ['Matematica', 'Volume della sfera', 'V = 4/3*pi*r^3', { V: ['volume', 'm³'], r: ['raggio', 'm'] }, ['V = 4/3 πr³', 'r = ∛(3V / (4π))']],
+    ['Matematica', 'Percentuale', 'p = x*q/100', { p: ['parte', ''], x: ['totale', ''], q: ['percentuale', '%'] }, ['p = x · q / 100', 'x = 100 · p / q', 'q = 100 · p / x']],
+    ['Matematica', 'Proporzione a : b = c : d', 'd = b*c/a', { d: ['d', ''], a: ['a', ''], b: ['b', ''], c: ['c', ''] }, ['a · d = b · c (prodotto estremi = prodotto medi)', 'a = b · c / d', 'b = a · d / c', 'c = a · d / b', 'd = b · c / a']],
+    ['Matematica', 'Pendenza della retta', 'm = (y2-y1)/(x2-x1)', { m: ['coeff. angolare', ''], y2: ['y₂', ''], y1: ['y₁', ''], x2: ['x₂', ''], x1: ['x₁', ''] }, ['m = (y₂ − y₁) / (x₂ − x₁)', 'y₂ = y₁ + m(x₂ − x₁)', 'x₂ = x₁ + (y₂ − y₁) / m']],
+    ['Matematica', 'Distanza tra due punti', 'd = sqrt((x2-x1)^2+(y2-y1)^2)', { d: ['distanza', ''], x1: ['x₁', ''], y1: ['y₁', ''], x2: ['x₂', ''], y2: ['y₂', ''] }, ['d = √((x₂ − x₁)² + (y₂ − y₁)²)']],
+    ['Fisica', 'Velocità media (MRU)', 'v = s/t', { v: ['velocità', 'm/s'], s: ['spazio', 'm'], t: ['tempo', 's'] }, ['v = s / t', 's = v · t', 't = s / v']],
+    ['Fisica', 'Accelerazione', 'a = (v-v0)/t', { a: ['accelerazione', 'm/s²'], v: ['velocità finale', 'm/s'], v0: ['velocità iniziale', 'm/s'], t: ['tempo', 's'] }, ['a = (v − v₀) / t', 'v = v₀ + a · t', 'v₀ = v − a · t', 't = (v − v₀) / a']],
+    ['Fisica', 'Spazio nel moto accelerato', 's = v0*t + a*t^2/2', { s: ['spazio', 'm'], v0: ['velocità iniziale', 'm/s'], t: ['tempo', 's'], a: ['accelerazione', 'm/s²'] }, ['s = v₀t + ½at²', 'a = 2(s − v₀t) / t²', 'v₀ = (s − ½at²) / t', 't: equazione di 2° grado (se v₀ = 0 → t = √(2s / a))']],
+    ['Fisica', 'Velocità senza il tempo', 'v = sqrt(v0^2+2*a*s)', { v: ['velocità finale', 'm/s'], v0: ['velocità iniziale', 'm/s'], a: ['accelerazione', 'm/s²'], s: ['spazio', 'm'] }, ['v² = v₀² + 2as', 'v = √(v₀² + 2as)', 'a = (v² − v₀²) / (2s)', 's = (v² − v₀²) / (2a)', 'v₀ = √(v² − 2as)']],
+    ['Fisica', 'Caduta libera', 'h = 9.81*t^2/2', { h: ['altezza', 'm'], t: ['tempo', 's'] }, ['h = ½ g t²', 't = √(2h / g)', 'v = g · t = √(2gh)']],
+    ['Fisica', '2ª legge di Newton', 'F = m*a', { F: ['forza', 'N'], m: ['massa', 'kg'], a: ['accelerazione', 'm/s²'] }, ['F = m · a', 'm = F / a', 'a = F / m']],
+    ['Fisica', 'Forza peso', 'P = m*9.81', { P: ['peso', 'N'], m: ['massa', 'kg'] }, ['P = m · g', 'm = P / g', 'g = P / m (9,81 m/s² sulla Terra)']],
+    ['Fisica', 'Forza d\'attrito', 'Fa = mu*N', { Fa: ['forza d\'attrito', 'N'], mu: ['coeff. d\'attrito μ', '', 'attrito'], N: ['forza normale', 'N'] }, ['Fa = μ · N', 'μ = Fa / N', 'N = Fa / μ']],
+    ['Fisica', 'Legge di Hooke', 'F = k*x', { F: ['forza', 'N'], k: ['costante elastica', 'N/m'], x: ['allungamento', 'm'] }, ['F = k · x', 'k = F / x', 'x = F / k']],
+    ['Fisica', 'Momento di una forza', 'M = F*b', { M: ['momento', 'N·m'], F: ['forza', 'N'], b: ['braccio', 'm'] }, ['M = F · b', 'F = M / b', 'b = M / F']],
+    ['Fisica', 'Densità', 'd = m/V', { d: ['densità', 'kg/m³', 'dens'], m: ['massa', 'kg'], V: ['volume', 'm³'] }, ['d = m / V', 'm = d · V', 'V = m / d']],
+    ['Fisica', 'Peso specifico', 'ps = d*9.81', { ps: ['peso specifico', 'N/m³'], d: ['densità', 'kg/m³', 'dens'] }, ['ps = d · g', 'd = ps / g']],
+    ['Fisica', 'Pressione', 'p = F/S', { p: ['pressione', 'Pa'], F: ['forza', 'N'], S: ['superficie', 'm²'] }, ['p = F / S', 'F = p · S', 'S = F / p']],
+    ['Fisica', 'Pressione idrostatica (Stevino)', 'p = d*9.81*h', { p: ['pressione', 'Pa'], d: ['densità liquido', 'kg/m³', 'dens'], h: ['profondità', 'm'] }, ['p = d · g · h', 'h = p / (d · g)', 'd = p / (g · h)']],
+    ['Fisica', 'Spinta di Archimede', 'Sa = d*9.81*V', { Sa: ['spinta', 'N'], d: ['densità del fluido', 'kg/m³', 'dens'], V: ['volume immerso', 'm³'] }, ['Sa = d · g · V', 'V = Sa / (d · g)', 'd = Sa / (g · V)']],
+    ['Fisica', 'Legge di Boyle (T costante)', 'p2 = p1*V1/V2', { p2: ['pressione finale', ''], p1: ['pressione iniziale', ''], V1: ['volume iniziale', ''], V2: ['volume finale', ''] }, ['p₁ · V₁ = p₂ · V₂', 'p₂ = p₁ · V₁ / V₂', 'V₂ = p₁ · V₁ / p₂', 'p₁ = p₂ · V₂ / V₁', 'V₁ = p₂ · V₂ / p₁']],
+    ['Fisica', 'Lavoro', 'L = F*s', { L: ['lavoro', 'J'], F: ['forza', 'N'], s: ['spostamento', 'm'] }, ['L = F · s (forza parallela allo spostamento)', 'F = L / s', 's = L / F', 'con angolo: L = F · s · cos α']],
+    ['Fisica', 'Energia cinetica', 'Ec = m*v^2/2', { Ec: ['energia cinetica', 'J'], m: ['massa', 'kg'], v: ['velocità', 'm/s'] }, ['Ec = ½ m v²', 'm = 2Ec / v²', 'v = √(2Ec / m)']],
+    ['Fisica', 'Energia potenziale', 'Ep = m*9.81*h', { Ep: ['energia potenziale', 'J'], m: ['massa', 'kg'], h: ['altezza', 'm'] }, ['Ep = m · g · h', 'm = Ep / (g · h)', 'h = Ep / (m · g)']],
+    ['Fisica', 'Potenza', 'P = L/t', { P: ['potenza', 'W'], L: ['lavoro', 'J'], t: ['tempo', 's'] }, ['P = L / t', 'L = P · t', 't = L / P', 'anche P = F · v']],
+    ['Fisica', 'Rendimento', 'eta = Pu/Pa', { eta: ['rendimento η', ''], Pu: ['potenza utile', 'W'], Pa: ['potenza assorbita', 'W'] }, ['η = Pu / Pa', 'Pu = η · Pa', 'Pa = Pu / η']],
+    ['Fisica', 'Calore (calorimetria)', 'Q = m*cs*dT', { Q: ['calore', 'J'], m: ['massa', 'kg'], cs: ['calore specifico', 'J/(kg·K)', 'cs'], dT: ['ΔT variazione di temperatura', '°C o K'] }, ['Q = m · c · ΔT', 'm = Q / (c · ΔT)', 'c = Q / (m · ΔT)', 'ΔT = Q / (m · c)']],
+    ['Fisica', 'Temperatura di equilibrio', 'Te = (m1*c1*T1+m2*c2*T2)/(m1*c1+m2*c2)', { Te: ['temperatura di equilibrio', '°C'], m1: ['massa 1', 'kg'], c1: ['calore specifico 1', 'J/(kg·K)', 'cs'], T1: ['temperatura 1', '°C'], m2: ['massa 2', 'kg'], c2: ['calore specifico 2', 'J/(kg·K)', 'cs'], T2: ['temperatura 2', '°C'] }, ['Te = (m₁c₁T₁ + m₂c₂T₂) / (m₁c₁ + m₂c₂)', 'calore ceduto = calore assorbito']],
+    ['Fisica', 'Dilatazione lineare', 'dL = l*L0*dT', { dL: ['ΔL allungamento', 'm (o mm)'], l: ['λ coeff. di dilatazione lineare', '1/°C', 'dil'], L0: ['L₀ lunghezza iniziale', 'm (o mm)'], dT: ['ΔT variazione di temperatura', '°C'] }, ['ΔL = λ · L₀ · ΔT', 'λ = ΔL / (L₀ · ΔT)', 'L₀ = ΔL / (λ · ΔT)', 'ΔT = ΔL / (λ · L₀)']],
+    ['Fisica', 'Lunghezza finale (dilatazione)', 'L = L0*(1+l*dT)', { L: ['L lunghezza finale', 'm'], L0: ['L₀ lunghezza iniziale', 'm'], l: ['λ coeff. di dilatazione lineare', '1/°C', 'dil'], dT: ['ΔT', '°C'] }, ['L = L₀ · (1 + λ · ΔT)', 'L₀ = L / (1 + λ · ΔT)', 'ΔT = (L / L₀ − 1) / λ', 'λ = (L / L₀ − 1) / ΔT']],
+    ['Fisica', 'Dilatazione superficiale', 'dS = 2*l*S0*dT', { dS: ['ΔS aumento di superficie', 'm²'], l: ['λ coeff. di dilatazione lineare', '1/°C', 'dil'], S0: ['S₀ superficie iniziale', 'm²'], dT: ['ΔT', '°C'] }, ['ΔS = 2λ · S₀ · ΔT', 'S₀ = ΔS / (2λ · ΔT)', 'ΔT = ΔS / (2λ · S₀)', 'λ = ΔS / (2 · S₀ · ΔT)']],
+    ['Fisica', 'Dilatazione volumica', 'dV = g3*V0*dT', { dV: ['ΔV aumento di volume', 'm³'], g3: ['γ coeff. di dilatazione volumica', '1/°C', 'dilv'], V0: ['V₀ volume iniziale', 'm³'], dT: ['ΔT', '°C'] }, ['ΔV = γ · V₀ · ΔT', 'γ = ΔV / (V₀ · ΔT)', 'V₀ = ΔV / (γ · ΔT)', 'ΔT = ΔV / (γ · V₀)', 'per i solidi γ ≈ 3λ']],
+    ['Fisica', 'Celsius ↔ Kelvin', 'TK = TC + 273.15', { TK: ['temperatura in kelvin', 'K'], TC: ['temperatura in °C', '°C'] }, ['T(K) = T(°C) + 273,15', 'T(°C) = T(K) − 273,15', 'ΔT in °C = ΔT in K']],
+    ['Fisica', 'Celsius ↔ Fahrenheit', 'TF = TC*9/5 + 32', { TF: ['temperatura in °F', '°F'], TC: ['temperatura in °C', '°C'] }, ['T(°F) = T(°C) · 9/5 + 32', 'T(°C) = (T(°F) − 32) · 5/9']],
+    ['Fisica', 'Legge di Ohm', 'V = R*I', { V: ['tensione', 'V'], R: ['resistenza', 'Ω'], I: ['corrente', 'A'] }, ['V = R · I', 'R = V / I', 'I = V / R']],
+    ['Fisica', 'Potenza elettrica', 'P = V*I', { P: ['potenza', 'W'], V: ['tensione', 'V'], I: ['corrente', 'A'] }, ['P = V · I = R · I² = V² / R', 'V = P / I', 'I = P / V']],
+    ['Fisica', 'Resistenza di un filo (2ª legge di Ohm)', 'R = rho*L/S', { R: ['resistenza', 'Ω'], rho: ['ρ resistività', 'Ω·mm²/m', 'resist'], L: ['lunghezza', 'm'], S: ['sezione', 'mm²'] }, ['R = ρ · L / S', 'ρ = R · S / L', 'L = R · S / ρ', 'S = ρ · L / R']],
+    ['Fisica', 'Errore relativo', 'er = ea/x', { er: ['errore relativo', ''], ea: ['errore assoluto', ''], x: ['valore medio', ''] }, ['er = ea / x̄', 'ea = er · x̄', 'x̄ = ea / er', 'errore percentuale = er · 100', 'ea = (max − min) / 2']],
+    ['Chimica', 'Moli', 'n = m/M', { n: ['moli', 'mol'], m: ['massa', 'g'], M: ['massa molare', 'g/mol'] }, ['n = m / M', 'm = n · M', 'M = m / n']],
+    ['Chimica', 'Numero di particelle', 'N = n*6.022e23', { N: ['particelle', ''], n: ['moli', 'mol'] }, ['N = n · Nₐ', 'n = N / Nₐ', 'Nₐ = 6,022 · 10²³ /mol']],
+    ['Chimica', 'Molarità', 'C = n/V', { C: ['molarità', 'mol/L'], n: ['moli', 'mol'], V: ['volume', 'L'] }, ['M = n / V', 'n = M · V', 'V = n / M']],
+    ['Chimica', 'Diluizione', 'C2 = C1*V1/V2', { C2: ['conc. finale', 'mol/L'], C1: ['conc. iniziale', 'mol/L'], V1: ['volume iniziale', 'L'], V2: ['volume finale', 'L'] }, ['C₁ · V₁ = C₂ · V₂', 'C₂ = C₁ · V₁ / V₂', 'C₁ = C₂ · V₂ / V₁', 'V₁ = C₂ · V₂ / C₁', 'V₂ = C₁ · V₁ / C₂']],
+    ['Chimica', 'Gas perfetti', 'P = n*0.0821*T/V', { P: ['pressione', 'atm'], n: ['moli', 'mol'], T: ['temperatura', 'K'], V: ['volume', 'L'] }, ['P · V = n · R · T (R = 0,0821 L·atm/(mol·K))', 'P = nRT / V', 'V = nRT / P', 'n = PV / (RT)', 'T = PV / (nR)']],
+    ['Chimica', 'pH', 'pH = -log(H)', { pH: ['pH', ''], H: ['[H⁺]', 'mol/L'] }, ['pH = −log[H⁺]', '[H⁺] = 10^(−pH)', 'pOH = 14 − pH', '[OH⁻] = 10^(−pOH)']],
+    ['Chimica', 'Neutroni', 'N = A - Z', { N: ['neutroni', ''], A: ['numero di massa', ''], Z: ['numero atomico', ''] }, ['N = A − Z', 'A = Z + N', 'Z = A − N', 'atomo neutro: elettroni = Z']],
+    ['Chimica', 'Percentuale in massa (m/m)', 'p = ms/mt*100', { p: ['% m/m', '%'], ms: ['massa soluto', 'g'], mt: ['massa soluzione', 'g'] }, ['%m/m = m soluto / m soluzione · 100', 'm soluto = % · m soluzione / 100', 'm soluzione = 100 · m soluto / %']],
+    ['Chimica', 'Percentuale massa/volume (m/V)', 'p = ms/V*100', { p: ['% m/V', '%'], ms: ['massa soluto', 'g'], V: ['volume soluzione', 'mL'] }, ['%m/V = m soluto (g) / V soluzione (mL) · 100', 'm soluto = % · V / 100', 'V = 100 · m soluto / %']],
+    ['Chimica', 'Massa atomica media (2 isotopi)', 'Am = (A1*p1+A2*p2)/100', { Am: ['massa atomica media', 'u'], A1: ['massa isotopo 1', 'u'], p1: ['abbondanza 1', '%'], A2: ['massa isotopo 2', 'u'], p2: ['abbondanza 2', '%'] }, ['Am = (A₁ · %₁ + A₂ · %₂) / 100']],
+    ['Meccanica', 'Velocità di taglio', 'Vt = pi*D*n/1000', { Vt: ['velocità di taglio', 'm/min', 'vt'], D: ['diametro', 'mm'], n: ['giri', 'giri/min'] }, ['Vt = π · D · n / 1000', 'n = 1000 · Vt / (π · D)', 'D = 1000 · Vt / (π · n)']],
+    ['Meccanica', 'Avanzamento della fresa', 'Vf = fz*z*n', { Vf: ['avanzamento', 'mm/min'], fz: ['avanzamento per dente', 'mm/dente'], z: ['numero denti', ''], n: ['giri', 'giri/min'] }, ['Vf = fz · z · n', 'fz = Vf / (z · n)', 'n = Vf / (fz · z)']],
+    ['Meccanica', 'Momento torcente', 'Mt = 9550*P/n', { Mt: ['momento', 'N·m'], P: ['potenza', 'kW'], n: ['giri', 'giri/min'] }, ['Mt = 9550 · P / n', 'P = Mt · n / 9550', 'n = 9550 · P / Mt']],
+    ['Meccanica', 'Tensione normale', 'sig = N/A', { sig: ['σ tensione', 'N/mm²'], N: ['forza', 'N'], A: ['sezione', 'mm²'] }, ['σ = N / A', 'N = σ · A', 'A = N / σ']],
+    ['Meccanica', 'Rapporto di trasmissione', 'i = z2/z1', { i: ['rapporto', ''], z2: ['denti condotta', ''], z1: ['denti motrice', ''] }, ['i = z₂ / z₁ = n₁ / n₂ = d₂ / d₁', 'z₂ = i · z₁', 'z₁ = z₂ / i', 'n₂ = n₁ / i']],
+    ['Meccanica', 'Ruota dentata (diametro primitivo)', 'd = m*z', { d: ['diametro primitivo', 'mm'], m: ['modulo', 'mm'], z: ['numero denti', ''] }, ['d = m · z', 'm = d / z', 'z = d / m', 'de = m · (z + 2)', 'passo p = π · m']],
+    ['Meccanica', 'Interasse ruote dentate', 'a = m*(z1+z2)/2', { a: ['interasse', 'mm'], m: ['modulo', 'mm'], z1: ['denti ruota 1', ''], z2: ['denti ruota 2', ''] }, ['a = m · (z₁ + z₂) / 2', 'm = 2a / (z₁ + z₂)', 'z₂ = 2a / m − z₁']],
   ];
+  // Tabelle (valori indicativi da manuale)
+  const TAB = {
+    dil: { n: 'Coefficienti di dilatazione lineare λ', u: '1/°C', mult: 1e-6, colonna: 'λ (× 10⁻⁶ /°C)', r: [['Invar', 1.2], ['Vetro Pyrex', 3.2], ['Legno (lungo le fibre)', 4], ['Tungsteno', 4.5], ['Titanio', 8.6], ['Vetro comune', 9], ['Ghisa', 10], ['Calcestruzzo', 12], ['Acciaio', 12], ['Ferro', 12], ['Nichel', 13], ['Oro', 14], ['Rame', 17], ['Bronzo', 18], ['Ottone', 19], ['Argento', 19], ['Alluminio', 23], ['Stagno', 23], ['Piombo', 29], ['Zinco', 30], ['Ghiaccio', 51], ['PVC', 80], ['Nylon', 100], ['Polietilene', 200]] },
+    dilv: { n: 'Coefficienti di dilatazione volumica γ', u: '1/°C', mult: 1e-4, colonna: 'γ (× 10⁻⁴ /°C)', r: [['Acciaio (≈ 3λ)', 0.36], ['Rame (≈ 3λ)', 0.51], ['Alluminio (≈ 3λ)', 0.69], ['Mercurio', 1.82], ['Acqua (a 20 °C)', 2.1], ['Glicerina', 5], ['Olio d\'oliva', 7], ['Petrolio', 9], ['Benzina', 9.5], ['Alcol etilico', 11], ['Acetone', 14.9], ['Gas perfetto (a 0 °C)', 36.6]] },
+    cs: { n: 'Calore specifico c', u: 'J/(kg·K)', mult: 1, colonna: 'c (J/(kg·K))', r: [['Piombo', 128], ['Oro', 129], ['Argento', 235], ['Ottone', 380], ['Rame', 385], ['Zinco', 388], ['Ferro', 450], ['Acciaio', 460], ['Vetro', 840], ['Calcestruzzo', 880], ['Alluminio', 900], ['Aria', 1005], ['Legno', 1700], ['Olio', 1970], ['Ghiaccio', 2090], ['Alcol etilico', 2440], ['Acqua', 4186]] },
+    dens: { n: 'Densità', u: 'kg/m³', mult: 1, colonna: 'd (kg/m³)', r: [['Aria', 1.29], ['Legno (abete)', 450], ['Benzina', 720], ['Alcol etilico', 790], ['Olio', 920], ['Ghiaccio', 917], ['Acqua', 1000], ['Acqua di mare', 1030], ['Glicerina', 1260], ['Calcestruzzo', 2400], ['Vetro', 2500], ['Alluminio', 2700], ['Titanio', 4500], ['Zinco', 7130], ['Ghisa', 7200], ['Acciaio', 7850], ['Ferro', 7870], ['Ottone', 8500], ['Rame', 8960], ['Argento', 10500], ['Piombo', 11340], ['Mercurio', 13600], ['Oro', 19300]] },
+    resist: { n: 'Resistività ρ a 20 °C', u: 'Ω·mm²/m', mult: 1, colonna: 'ρ (Ω·mm²/m)', r: [['Argento', 0.016], ['Rame', 0.0175], ['Oro', 0.024], ['Alluminio', 0.028], ['Tungsteno', 0.055], ['Ottone', 0.07], ['Ferro', 0.10], ['Stagno', 0.11], ['Acciaio', 0.15], ['Piombo', 0.21], ['Costantana', 0.49], ['Nichel-cromo', 1.1]] },
+    attrito: { n: 'Coefficienti d\'attrito μ (radente)', u: '', mult: 1, colonna: 'μ statico ~ dinamico', r: [['Acciaio su ghiaccio', 0.03], ['Acciaio su acciaio lubrificato', 0.1], ['Legno su legno', 0.4], ['Acciaio su acciaio (secco)', 0.6], ['Gomma su asfalto bagnato', 0.5], ['Gomma su asfalto asciutto', 0.8], ['Alluminio su acciaio', 0.6]] },
+    vt: { n: 'Velocità di taglio Vt (tornitura)', u: 'm/min', mult: 1, colonna: 'Vt con utensile HSS', r: [['Acciaio legato', 20], ['Ghisa', 20], ['Acciaio dolce', 30], ['Bronzo', 40], ['Ottone', 60], ['Alluminio', 150]] },
+  };
+  const PRETTY = { l: 'λ', dL: 'ΔL', dT: 'ΔT', dS: 'ΔS', dV: 'ΔV', g3: 'γ', mu: 'μ', rho: 'ρ', sig: 'σ', eta: 'η', L0: 'L₀', S0: 'S₀', V0: 'V₀', v0: 'v₀', C1: 'C₁', C2: 'C₂', V1: 'V₁', V2: 'V₂', z1: 'z₁', z2: 'z₂', p1: 'p₁', p2: 'p₂', x1: 'x₁', x2: 'x₂', y1: 'y₁', y2: 'y₂', m1: 'm₁', m2: 'm₂', c1: 'c₁', c2: 'c₂', T1: 'T₁', T2: 'T₂', A1: 'A₁', A2: 'A₂', TK: 'T(K)', TC: 'T(°C)', TF: 'T(°F)', H: '[H⁺]' };
+  const pv = k => PRETTY[k] || k;
   function solveFormula(fm, known, unk) {
     const [lhs, rhs] = fm[2].split('=').map(s => s.trim()); const fr = compile(rhs);
     const g = x => { const sc = Object.assign({}, known, { [unk]: x }); return (unk === lhs ? x : sc[lhs]) - fr(sc, 'rad'); };
@@ -257,6 +300,16 @@
         if (tp === 1) return { q: 'Forza necessaria per accelerare ' + m + ' kg a ' + a + ' m/s²?', a: m * a, unit: 'N', steps: ['F = m · a', m + ' · ' + a + ' = ' + m * a + ' N'] };
         return { q: 'Una forza di ' + m * 10 + ' N agisce su ' + fmtNum(S) + ' m². Pressione?', a: m * 10 / S, unit: 'Pa', tol: 0.01, steps: ['p = F / S', m * 10 + ' / ' + fmtNum(S) + ' = ' + fmtNum(m * 10 / S) + ' Pa'] }; } },
     { id: 'pitag', m: 'Matematica', t: 'Teorema di Pitagora', k: ['pitagora', 'triangol', 'geometria'], g() { const T = pick([[3, 4, 5], [5, 12, 13], [6, 8, 10], [8, 15, 17], [9, 12, 15], [7, 24, 25]]); const k = R(1, 3); const [a, b, c] = T.map(x => x * k); return R(0, 1) ? { q: 'Cateti ' + a + ' cm e ' + b + ' cm. Ipotenusa?', a: c, unit: 'cm', steps: ['i = √(a² + b²)', '√(' + a * a + ' + ' + b * b + ') = √' + c * c + ' = ' + c + ' cm'] } : { q: 'Ipotenusa ' + c + ' cm, un cateto ' + a + ' cm. L\'altro cateto?', a: b, unit: 'cm', steps: ['b = √(i² − a²)', '√(' + c * c + ' − ' + a * a + ') = √' + b * b + ' = ' + b + ' cm'] }; } },
+    { id: 'dilat', m: 'Fisica', t: 'Dilatazione termica', k: ['dilataz', 'termic', 'coefficiente di dilatazione', 'temperatura', 'calore'], g() { const M = pick(TAB.dil.r.filter(r => r[1] >= 8 && r[1] <= 30)); const lam = M[1] * 1e-6; const L0 = pick([0.5, 1, 1.5, 2, 3, 5, 10, 20, 50]); const T1 = R(-10, 25), dT = R(20, 180); const T2 = T1 + dT; const tp = R(0, 3); const dL = lam * L0 * dT;
+        if (tp === 0) return { q: `Una barra di ${M[0].toLowerCase()} lunga ${fmtNum(L0)} m passa da ${T1} °C a ${T2} °C. Di quanti mm si allunga? (λ = ${fmtNum(M[1])}·10⁻⁶ /°C)`, a: dL * 1000, unit: 'mm', tol: 0.005, steps: ['ΔT = ' + T2 + ' − (' + T1 + ') = ' + dT + ' °C', 'ΔL = λ · L₀ · ΔT', 'ΔL = ' + fmtNum(M[1]) + '·10⁻⁶ · ' + fmtNum(L0) + ' · ' + dT + ' = ' + fmtNum(dL) + ' m', 'In mm: ' + fmtNum(dL) + ' × 1000 = ' + fmtNum(dL * 1000) + ' mm'] };
+        if (tp === 1) return { q: `Barra di ${M[0].toLowerCase()} lunga ${fmtNum(L0)} m a ${T1} °C, riscaldata a ${T2} °C (λ = ${fmtNum(M[1])}·10⁻⁶ /°C). Lunghezza finale in m?`, a: L0 * (1 + lam * dT), unit: 'm', tol: 1e-7, steps: ['ΔT = ' + dT + ' °C', 'L = L₀ · (1 + λ · ΔT)', 'L = ' + fmtNum(L0) + ' · (1 + ' + fmtNum(lam) + ' · ' + dT + ') = ' + fmtNum(L0 * (1 + lam * dT), 9) + ' m'] };
+        if (tp === 2) return { q: `Una barra lunga ${fmtNum(L0)} m si allunga di ${fmtNum(+(dL * 1000).toFixed(3))} mm quando la temperatura sale di ${dT} °C. Quanto vale λ (in 10⁻⁶ /°C)? Di che materiale può essere?`, a: (+(dL * 1000).toFixed(3)) / 1000 / (L0 * dT) * 1e6, unit: '× 10⁻⁶ /°C', tol: 0.02, steps: ['Formula inversa: λ = ΔL / (L₀ · ΔT)', 'ΔL in metri = ' + fmtNum(+(dL * 1000).toFixed(3) / 1000), 'λ = ' + fmtNum(+(dL * 1000).toFixed(3) / 1000) + ' / (' + fmtNum(L0) + ' · ' + dT + ') ≈ ' + fmtNum(M[1], 3) + ' · 10⁻⁶ /°C', 'Dalla tabella: ' + TAB.dil.r.filter(r => Math.abs(r[1] - M[1]) < 0.6).map(r => r[0]).join(', ')] };
+        const dLmm = +(dL * 1000).toFixed(2); return { q: `Una barra di ${M[0].toLowerCase()} (λ = ${fmtNum(M[1])}·10⁻⁶ /°C) lunga ${fmtNum(L0)} m deve allungarsi di ${fmtNum(dLmm)} mm. Di quanti gradi va scaldata?`, a: dLmm / 1000 / (lam * L0), unit: '°C', tol: 0.01, steps: ['Formula inversa: ΔT = ΔL / (λ · L₀)', 'ΔL = ' + fmtNum(dLmm) + ' mm = ' + fmtNum(dLmm / 1000) + ' m', 'ΔT = ' + fmtNum(dLmm / 1000) + ' / (' + fmtNum(lam) + ' · ' + fmtNum(L0) + ') ≈ ' + fmtNum(dLmm / 1000 / (lam * L0), 4) + ' °C'] }; } },
+    { id: 'calore', m: 'Fisica', t: 'Calore e calore specifico', k: ['calore', 'calorimetr', 'specifico', 'temperatura', 'termolog'], g() { const M = pick(TAB.cs.r.filter(r => r[1] > 300)); const m = pick([0.2, 0.5, 1, 2, 3, 5]), dT = R(5, 60); const Q = m * M[1] * dT; const tp = R(0, 2);
+        if (tp === 0) return { q: `Quanto calore serve per scaldare ${fmtNum(m)} kg di ${M[0].toLowerCase()} di ${dT} °C? (c = ${M[1]} J/(kg·K))`, a: Q, unit: 'J', tol: 0.001, steps: ['Q = m · c · ΔT', fmtNum(m) + ' · ' + M[1] + ' · ' + dT + ' = ' + fmtNum(Q) + ' J (= ' + fmtNum(Q / 1000) + ' kJ)'] };
+        if (tp === 1) return { q: `Fornisco ${fmtNum(Q)} J a ${fmtNum(m)} kg di ${M[0].toLowerCase()} (c = ${M[1]} J/(kg·K)). Di quanti gradi sale la temperatura?`, a: dT, unit: '°C', tol: 0.001, steps: ['Formula inversa: ΔT = Q / (m · c)', fmtNum(Q) + ' / (' + fmtNum(m) + ' · ' + M[1] + ') = ' + dT + ' °C'] };
+        return { q: `Con ${fmtNum(Q)} J una massa di ${fmtNum(m)} kg si scalda di ${dT} °C. Calore specifico?`, a: M[1], unit: 'J/(kg·K)', tol: 0.001, steps: ['Formula inversa: c = Q / (m · ΔT)', fmtNum(Q) + ' / (' + fmtNum(m) + ' · ' + dT + ') = ' + M[1] + ' J/(kg·K) → ' + M[0]] }; } },
+    { id: 'temp', m: 'Fisica', t: 'Scale di temperatura', k: ['temperatura', 'kelvin', 'celsius', 'termometr'], g() { const C = R(-40, 150); return R(0, 1) ? { q: 'Converti ' + C + ' °C in kelvin', a: C + 273.15, unit: 'K', steps: ['T(K) = T(°C) + 273,15', C + ' + 273,15 = ' + fmtNum(C + 273.15) + ' K'] } : { q: 'Converti ' + fmtNum(C + 273.15) + ' K in °C', a: C, unit: '°C', steps: ['Formula inversa: T(°C) = T(K) − 273,15', fmtNum(C + 273.15) + ' − 273,15 = ' + C + ' °C'] }; } },
     { id: 'taglio', m: 'Meccanica', t: 'Velocità di taglio e giri', k: ['tornio', 'fresatura', 'taglio', 'lavorazion', 'velocità di taglio'], g() { const D = pick([10, 16, 20, 25, 32, 40, 50, 63, 80]), Vt = pick([25, 30, 80, 120, 150, 200]); return { q: 'Diametro ' + D + ' mm, Vt = ' + Vt + ' m/min. Numero di giri del mandrino?', a: 1000 * Vt / (Math.PI * D), unit: 'giri/min', tol: 0.01, steps: ['n = 1000 · Vt / (π · D)', '1000 · ' + Vt + ' / (π · ' + D + ') = ' + fmtNum(1000 * Vt / (Math.PI * D), 5) + ' giri/min'] }; } },
   ];
   function consigliati(topics) {
@@ -316,19 +369,25 @@
       b.querySelector('#cx_ss').onclick = () => { try { show(b.querySelector('#cx_so'), solveSys(b.querySelector('#cx_s1').value, b.querySelector('#cx_s2').value)); } catch (e) { b.querySelector('#cx_so').innerHTML = `<p class="ko">${esc(e.message)}</p>`; } };
     }
     function vForm(b) {
-      const mats = [...new Set(FORM.map(f => f[0]))]; let cur = S.fsel || 0;
-      b.innerHTML = `<div class="row"><select id="cx_fm" style="max-width:340px">${mats.map(m => `<optgroup label="${m}">${FORM.map((f, i) => f[0] === m ? `<option value="${i}" ${i === cur ? 'selected' : ''}>${esc(f[1])}</option>` : '').join('')}</optgroup>`).join('')}</select><input id="cx_fq" placeholder="cerca formula…" style="max-width:220px"></div><div id="cx_fb"></div>`;
+      const mats = [...new Set(FORM.map(f => f[0]))]; let cur = Math.min(S.fsel || 0, FORM.length - 1);
+      b.innerHTML = `<div class="row"><select id="cx_fm" style="max-width:340px">${mats.map(m => `<optgroup label="${m}">${FORM.map((f, i) => f[0] === m ? `<option value="${i}" ${i === cur ? 'selected' : ''}>${esc(f[1])}</option>` : '').join('')}</optgroup>`).join('')}</select><input id="cx_fq" placeholder="cerca (es. dilatazione, moli)…" style="max-width:240px"><button id="cx_tb">📋 Tabelle</button></div><div id="cx_fb"></div>`;
       const draw = () => { const f = FORM[cur]; const vars = Object.entries(f[3]);
-        b.querySelector('#cx_fb').innerHTML = `<div class="card"><div class="sol" style="font-family:ui-monospace,Menlo,monospace">${esc(f[2].replace(/\*/g, '·').replace(/pi/g, 'π').replace(/sqrt/g, '√'))}</div><div class="mut">Compila i valori che conosci e lascia vuoto quello da trovare.</div>
-          ${vars.map(([k, [d, u]]) => `<div class="row" style="margin:5px 0"><label style="min-width:170px">${esc(d)} <b>${esc(k)}</b></label><input data-v="${esc(k)}" style="max-width:180px" inputmode="decimal"><span class="mut">${esc(u)}</span></div>`).join('')}
+        b.querySelector('#cx_fb').innerHTML = `<div class="card"><div class="mut">${esc(f[0])}</div><div class="sol">${esc(f[1])}</div>
+          <div class="card" style="margin:6px 0"><b>Formula e formule inverse</b>${(f[4] || []).map((x, i) => `<div class="step" style="font-family:ui-monospace,Menlo,monospace;${i ? '' : 'font-weight:700'}">${esc(x)}</div>`).join('')}
+          <div class="mut" style="margin-top:6px">${vars.map(([k, [d, u]]) => `<b>${esc(pv(k))}</b> = ${esc(d)}${u ? ' [' + esc(u) + ']' : ''}`).join(' · ')}</div></div>
+          <div class="mut">Calcola: compila i valori che conosci e lascia vuoto quello da trovare.</div>
+          ${vars.map(([k, [d, u, tb]]) => `<div class="row" style="margin:5px 0"><label style="min-width:190px"><b>${esc(pv(k))}</b> ${esc(d)}</label><input data-v="${esc(k)}" style="max-width:170px" inputmode="decimal"><span class="mut">${esc(u)}</span>${tb && TAB[tb] ? `<select data-tab="${esc(k)}" data-t="${tb}" style="max-width:200px"><option value="">📋 dalla tabella…</option>${TAB[tb].r.map(r => `<option value="${r[1] * TAB[tb].mult}">${esc(r[0])} — ${fmtNum(r[1])}${TAB[tb].mult !== 1 ? ' × ' + fmtNum(TAB[tb].mult) : ''}</option>`).join('')}</select>` : ''}</div>`).join('')}
           <button class="pri" id="cx_fs">Calcola</button><div id="cx_fo"></div></div>`;
-        b.querySelector('#cx_fs').onclick = () => { const known = {}; let unk = null, n = 0; b.querySelectorAll('[data-v]').forEach(i => { const v = i.value.trim(); if (v === '') { unk = i.dataset.v; n++; } else known[i.dataset.v] = calc(v); });
+        b.querySelectorAll('[data-tab]').forEach(sl => sl.onchange = () => { if (sl.value) b.querySelector(`[data-v="${sl.dataset.tab}"]`).value = String(+(+sl.value).toPrecision(6)).replace('.', ','); });
+        b.querySelector('#cx_fs').onclick = () => { const known = {}; let unk = null, n = 0; try { b.querySelectorAll('[data-v]').forEach(i => { const v = i.value.trim(); if (v === '') { unk = i.dataset.v; n++; } else known[i.dataset.v] = calc(v); }); } catch (e) { b.querySelector('#cx_fo').innerHTML = `<p class="ko">${esc(e.message)}</p>`; return; }
           const o = b.querySelector('#cx_fo'); if (n !== 1) { o.innerHTML = '<p class="ko">Lascia vuoto un solo campo.</p>'; return; }
-          const x = solveFormula(f, known, unk); const u = f[3][unk][1];
-          o.innerHTML = isNaN(x) ? '<p class="ko">Non trovo una soluzione con questi valori.</p>' : `<div class="step">Formula: ${esc(f[2])}</div><div class="step">Sostituisco: ${Object.entries(known).map(([k, v]) => k + ' = ' + fmtNum(v)).join(' ; ')}</div>${unk !== f[2].split('=')[0].trim() ? '<div class="step">Ricavo ' + esc(unk) + ' dalla formula inversa</div>' : ''}<div class="sol">${esc(f[3][unk][0])} ${esc(unk)} = ${fmtNum(x)} ${esc(u)}</div>`; const inp = b.querySelector(`[data-v="${unk}"]`); if (!isNaN(x)) inp.placeholder = fmtNum(x); };
+          const x = solveFormula(f, known, unk); const u = f[3][unk][1]; const inv = (f[4] || []).find(s => s.replace(/\s/g, '').startsWith(pv(unk) + '=') || s.replace(/\s/g, '').startsWith(unk + '='));
+          o.innerHTML = isNaN(x) ? '<p class="ko">Non trovo una soluzione con questi valori.</p>' : `<div class="step">Formula${inv && inv !== (f[4] || [])[0] ? ' inversa' : ''}: <b>${esc(inv || f[2])}</b></div><div class="step">Sostituisco: ${Object.entries(known).map(([k, v]) => esc(pv(k)) + ' = ' + fmtNum(v)).join(' ; ')}</div><div class="sol">${esc(pv(unk))} = ${fmtNum(x)} ${esc(u)}</div>${Math.abs(x) < 1e-3 || Math.abs(x) > 1e5 ? `<div class="mut">= ${x.toExponential(4).replace('.', ',').replace('e', ' · 10^')}</div>` : ''}`; };
       };
+      const tabelle = () => { b.querySelector('#cx_fb').innerHTML = Object.values(TAB).map(t => `<div class="card"><b>${esc(t.n)}</b> <span class="mut">${esc(t.u)}</span><table style="width:100%;border-collapse:collapse;margin-top:6px">${t.r.map(r => `<tr><td style="padding:3px 6px;border-bottom:1px solid var(--cxl)">${esc(r[0])}</td><td style="padding:3px 6px;border-bottom:1px solid var(--cxl);text-align:right;font-family:ui-monospace,Menlo,monospace">${fmtNum(r[1])}</td></tr>`).join('')}</table><div class="mut">Colonna: ${esc(t.colonna)}${t.mult !== 1 ? ' — nel calcolo usa il valore × ' + fmtNum(t.mult) : ''}</div></div>`).join('') + '<p class="mut">Valori indicativi: se il libro o il prof danno numeri diversi, usa i loro.</p>'; };
       b.querySelector('#cx_fm').onchange = e => { cur = +e.target.value; S.fsel = cur; save(); draw(); };
-      b.querySelector('#cx_fq').oninput = e => { const q = norm(e.target.value); const i = FORM.findIndex(f => norm(f[1] + ' ' + f[0] + ' ' + f[2]).includes(q)); if (q && i >= 0) { cur = i; b.querySelector('#cx_fm').value = i; draw(); } };
+      b.querySelector('#cx_tb').onclick = tabelle;
+      b.querySelector('#cx_fq').oninput = e => { const q = norm(e.target.value); const i = FORM.findIndex(f => norm(f[1] + ' ' + f[0] + ' ' + (f[4] || []).join(' ')).includes(q)); if (q && i >= 0) { cur = i; b.querySelector('#cx_fm').value = i; draw(); } };
       draw();
     }
     function vEs(b) {
@@ -362,5 +421,5 @@
       <li>Tasto <b>a b/c</b>: risultato in frazione</li></ul></div>`;
     }
   }
-  window.Calc = { mount, calc, solveEq, solveSys, toFrac, fmtNum, GEN, FORM };
+  window.Calc = { mount, calc, solveEq, solveSys, solveFormula, toFrac, fmtNum, GEN, FORM, TAB };
 })();
