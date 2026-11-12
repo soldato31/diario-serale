@@ -686,7 +686,7 @@ function fmtNum(x){if(x===null||x===undefined||!isFinite(x))return'—';const a=
 function fmtOhm(r){if(r>=1e6)return fmtNum(r/1e6)+' MΩ';if(r>=1e3)return fmtNum(r/1e3)+' kΩ';return fmtNum(r)+' Ω'}
 
 /* ============ UTILITÀ ============ */
-const APP_VER='3.0';
+const APP_VER='3.1';
 const KEY='diarioSerale_v1';
 const WD=['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];
 const WDL=['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
@@ -721,7 +721,7 @@ function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clea
 function vibrate(p){try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
 
 /* ============ DATI ============ */
-const AI_PROFILE='Studente adulto di 45 anni che lavora a turni in fabbrica (assemblaggio trasmissioni) e frequenta il corso serale di Meccanica e Meccatronica all\'IISS Marconi-Hack di Bari: è al primo anno e vuole accelerare per sostenere gli esami integrativi e passare al secondo o al terzo anno. Ha esperienza pratica di elettronica, CNC, stampa 3D e fonica live. Preferisce spiegazioni dirette, concrete, con esempi d\'officina.';
+const AI_PROFILE='Studente adulto di 45 anni che lavora a turni in fabbrica (assemblaggio trasmissioni) e frequenta il corso serale di Meccanica e Meccatronica all\'IISS Marconi-Hack di Bari: frequenta il secondo anno (2ª M) e vuole accelerare per sostenere gli esami integrativi e passare al secondo o al terzo anno. Ha esperienza pratica di elettronica, CNC, stampa 3D e fonica live. Preferisce spiegazioni dirette, concrete, con esempi d\'officina.';
 function defaultSettings(){return{name:'',school:'IISS Marconi-Hack · Bari',course:'Serale · Meccanica e Meccatronica',
   slots:[['16:45','17:45'],['17:45','18:45'],['18:45','19:45'],['19:45','20:45'],['20:45','21:45']],
   reducedUntil:'2026-09-30',reducedEnd:'19:45',start:'2026-09-21',end:'2027-06-10',threshold:75,monte:0,fadPct:20,
@@ -769,10 +769,44 @@ function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.v)retu
 let st=load();
 let _idbT=null,_ver=0;
 function save(){
-  _ver++;
+  _ver++;st._upd=Date.now();syncSoon();
   try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){toast('Memoria piena: fai un backup')}
   clearTimeout(_idbT);_idbT=setTimeout(()=>{kvPut('state',JSON.stringify(st)).catch(()=>{});kvPut('snap-'+today(),JSON.stringify(st)).catch(()=>{})},1500);
 }
+
+/* ============ SINCRONIZZAZIONE con il Portale Scuola (Gist privato GitHub) ============ */
+// Token e ID gist restano solo in questo dispositivo (localStorage 'ds_sync'), mai nei backup.
+const SYNC_FILE='diario-serale.json';
+const syncCfg=()=>{try{return JSON.parse(localStorage.getItem('ds_sync'))||{}}catch(e){return{}}};
+const setSyncCfg=o=>{try{localStorage.setItem('ds_sync',JSON.stringify(Object.assign(syncCfg(),o)))}catch(e){}};
+let _syncT=null,_syncBusy=false;
+function syncHeaders(){return{'Authorization':'Bearer '+syncCfg().token,'Accept':'application/vnd.github+json','Content-Type':'application/json'}}
+function syncPayload(){const d=JSON.parse(JSON.stringify(st));d.settings.gemKey='';return JSON.stringify({app:'diario-serale',upd:st._upd||0,data:d})}
+async function syncFindGist(){const r=await fetch('https://api.github.com/gists?per_page=100',{headers:syncHeaders()});if(!r.ok)throw new Error('Token non valido ('+r.status+')');
+  const L=await r.json();const g=L.find(x=>x.files&&x.files[SYNC_FILE]);if(g)return g.id;
+  const c=await fetch('https://api.github.com/gists',{method:'POST',headers:syncHeaders(),body:JSON.stringify({description:'Diario Serale + Portale Scuola (sync)',public:false,files:{[SYNC_FILE]:{content:syncPayload()}}})});
+  if(!c.ok)throw new Error('Creazione gist fallita ('+c.status+')');return(await c.json()).id}
+async function syncNow(quiet){const C=syncCfg();if(!C.token||_syncBusy)return;_syncBusy=true;
+  try{if(!C.gist){setSyncCfg({gist:await syncFindGist()})}
+    const r=await fetch('https://api.github.com/gists/'+syncCfg().gist,{headers:syncHeaders(),cache:'no-store'});if(!r.ok)throw new Error('Gist non raggiungibile ('+r.status+')');
+    const g=await r.json();const f=g.files[SYNC_FILE];let remote=null;
+    if(f){let txt=f.content;if(f.truncated)txt=await(await fetch(f.raw_url)).text();try{remote=JSON.parse(txt)}catch(e){}}
+    const lu=st._upd||0,ru=remote&&remote.upd||0;
+    if(remote&&remote.data&&(ru>lu||(C.first&&ru))){const key=st.settings.gemKey,model=st.settings.gemModel;st=migrate(remote.data);st._upd=ru;st.settings.gemKey=key;st.settings.gemModel=model;
+      try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}render();if(!quiet)toast('Aggiornato dal Portale/altro dispositivo')}
+    else if(lu>ru||!remote){const u=await fetch('https://api.github.com/gists/'+syncCfg().gist,{method:'PATCH',headers:syncHeaders(),body:JSON.stringify({files:{[SYNC_FILE]:{content:syncPayload()}}})});
+      if(!u.ok)throw new Error('Invio fallito ('+u.status+')');if(!quiet)toast('Sincronizzato ✓')}
+    else if(!quiet)toast('Già allineato ✓');
+    setSyncCfg({last:new Date().toISOString(),err:'',first:false})}
+  catch(e){setSyncCfg({err:String(e.message||e)});if(!quiet)toast('Sync: '+(e.message||e))}
+  finally{_syncBusy=false}}
+function syncSoon(){if(!syncCfg().token)return;clearTimeout(_syncT);_syncT=setTimeout(()=>syncNow(true),8000)}
+function syncCard(){const C=syncCfg();return`<section class="card"><div class="card-h"><h3>🔄 Sincronizzazione con il Portale Scuola</h3></div>
+  <p class="muted" style="margin-top:0">Diario e Portale (sul Mac) condividono gli stessi dati tramite un Gist <b>privato</b> del tuo GitHub. Serve un token GitHub con il solo permesso <b>gist</b>: crealo su github.com → Settings → Developer settings → Personal access tokens → Tokens (classic) → spunta solo «gist». Incollalo qui e nel Portale.</p>
+  ${fld('Token GitHub (resta solo su questo dispositivo)',`<input type="password" value="${C.token?'••••••••':''}" placeholder="ghp_…" onchange="if(!this.value.startsWith('•')){setSyncCfg({token:this.value.trim(),gist:'',first:true});syncNow()}">`)}
+  <div class="row"><button class="btn pri" onclick="syncNow()">Sincronizza ora</button>${C.token?`<button class="btn" onclick="localStorage.removeItem('ds_sync');render()">Scollega</button>`:''}</div>
+  <p class="hint">${C.last?'Ultima sincronizzazione: '+new Date(C.last).toLocaleString('it'):'Mai sincronizzato.'}${C.err?' · ⚠️ '+esc(C.err):''}${C.gist?' · gist '+esc(C.gist.slice(0,7)):''}</p></section>`}
+
 const subById=id=>id?st.subjects.find(x=>x.id===id):null;
 const conById=id=>id?st.contacts.find(x=>x.id===id):null;
 const libOf=s=>s?(s.lib||libKeyFor(s.name)):null;
@@ -890,33 +924,37 @@ function justMin(d){const lim=limitFor(d);if(!lim)return 0;const r=st.att[d];if(
 /* ============ ORARIO 2026/27 · classe 1ª M serale (provvisorio dal 21/09/2026) ============ */
 
 function applyTT2627(o){
-  if(!o||o.ttVer==='2627-1m-p1')return o;
+  if(!o||o.ttVer==='2627-2m')return o;
   const nz=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  const mail=(n,c)=>nz(n+'.'+c).replace(/[\s']/g,'')+'@marconibari.edu.it';
   o.subjects=o.subjects||[];o.contacts=o.contacts||[];
   const S=(match,name,mats)=>{let s=o.subjects.find(x=>match.some(m=>nz(x.name).includes(m)));
     if(!s){s={id:'s'+Math.random().toString(36).slice(2,8),name,color:PALETTE[o.subjects.length%PALETTE.length],materials:mats||['Quaderno'],credit:false};o.subjects.push(s)}
     s.credit=false;return s.id};
-  const P=(surname,full,sid)=>{if(!surname)return'';let c=o.contacts.find(x=>nz(x.name).includes(nz(surname)));
+  const P=(nome,cognome,full,sid)=>{let c=o.contacts.find(x=>nz(x.name).includes(nz(cognome)));
     if(!c){c={id:'c'+Math.random().toString(36).slice(2,8),name:full,role:'Docente',sub:sid,phone:'',email:'',note:''};o.contacts.push(c)}
-    else if(!c.sub)c.sub=sid;return c.id};
+    if(!c.email)c.email=mail(nome,cognome);c.sub=sid;return c.id};
   const ita=S(['italian'],'Italiano'),ing=S(['ingles'],'Inglese'),mat=S(['matemat'],'Matematica',['Quaderno a quadretti','Calcolatrice scientifica','Righello']),
-    sci=S(['scienze integrate','scienze della terra','biolog'],'Scienze integrate (Terra e Biologia)'),fis=S(['fisica'],'Fisica',['Quaderno','Calcolatrice scientifica']),
-    chi=S(['chimica'],'Chimica',['Quaderno','Tavola periodica','Calcolatrice scientifica']),dis=S(['disegno','rappresentazione grafica'],'Disegno tecnico'),
-    inf=S(['tecnologie informatiche','informatic'],'Tecnologie informatiche',['Chiavetta USB','Quaderno']);
-  const pLib=P('Liberti','Prof.ssa Rita Liberti',ita),pDiv=P('Di Virgilio','Prof.ssa Elisabetta Di Virgilio',ing),pLon=P('Lonigro','Prof. Antonio Lonigro',mat),
-    pSal=P('Salvemini','Prof. Michele Salvemini',fis),pPas=P('Pascale','Prof. Paolo Pascale',chi),pRot=P('Rotolo','Prof. Pasquale Rotolo',dis),
-    pDev=P('Devanna','Prof.ssa Antonella Devanna',inf),pBel=P('Bellino','Prof.ssa Maria Grazia Bellino (lab. chimica)',chi),
-    pPep=P('Peppino','Prof. Nicola Peppino (lab. fisica)',fis),pVas=P('Vasto','Prof. Antonio Vasto (lab. meccanico)',dis),pNap=P('Napolitano','Prof. Giuseppe Napolitano (lab. informatica)',inf);
+    fis=S(['fisica'],'Fisica',['Quaderno','Calcolatrice scientifica']),chi=S(['chimica'],'Chimica',['Quaderno','Tavola periodica','Calcolatrice scientifica']),
+    dis=S(['disegno','rappresentazione grafica'],'Disegno tecnico'),sta=S(['scienze e tecnologie applicate','tecnologie applicate'],'Scienze e tecnologie applicate',['Quaderno','Calcolatrice scientifica']),
+    dir=S(['diritto'],'Diritto ed economia',['Quaderno','Libro di diritto']);
+  const pPro=P('Domenico','Procacci','Prof. Domenico Procacci',ita),pCar=P('Letizia','Caramarossa','Prof.ssa Letizia Caramarossa',ita),
+    pDiv=P('Elisabetta','Di Virgilio','Prof.ssa Elisabetta Di Virgilio',ing),pChi=P('Gianluca','Chiarappa','Prof. Gianluca Chiarappa',mat),
+    pTro=P('Amalia','Troso','Prof.ssa Amalia Troso',dir),pVit=P('Elisabetta','Vitale','Prof.ssa Elisabetta Vitale',fis),
+    pPep=P('Nicola','Peppino','Prof. Nicola Peppino (lab. fisica)',fis),pPas=P('Paolo','Pascale','Prof. Paolo Pascale',chi),
+    pBel=P('Maria Grazia','Bellino','Prof.ssa Maria Grazia Bellino (lab. chimica)',chi),pInc=P('Nicola','Incampo','Prof. Nicola Incampo',sta),
+    pRot=P('Pasquale','Rotolo','Prof. Pasquale Rotolo',dis),pDem=P('Antonio','De Monte','Prof. Antonio De Monte (lab. meccanico)',dis);
   const c=(sub,prof,co)=>co?{sub,prof,co}:{sub,prof};
-  o.ttPrev=o.tt;
+  if(o.ttVer&&o.ttVer!=='2627-2m')o.ttPrev=o.tt;
   o.tt={
-    1:[c(fis,pSal),c(fis,pSal),c(ing,pDiv),c(mat,pLon),c(sci,'')],
-    2:[c(chi,pPas),c(chi,pPas,pBel),c(dis,pRot),c(dis,pRot),{}],
-    3:[c(inf,pDev),c(ita,pLib),c(fis,pSal,pPep),c(mat,pLon),c(mat,pLon)],
-    4:[c(dis,pRot,pVas),c(ing,pDiv),c(sci,''),c(sci,''),{}],
-    5:[c(inf,pDev,pNap),c(inf,pDev,pNap),c(ita,pLib),c(ita,pLib),{}]};
-  o.settings=o.settings||{};o.settings.classe='1ª M · 1° periodo';
-  o.ttVer='2627-1m-p1';o._ttNew=true;return o;
+    1:[c(ing,pDiv),c(mat,pChi),c(mat,pChi),c(ita,pPro),c(ita,pPro)],
+    2:[c(sta,pInc),c(sta,pInc),c(chi,pPas,pBel),c(chi,pPas,pBel),{}],
+    3:[c(fis,pVit,pPep),c(fis,pVit,pPep),c(dir,pTro),c(ita,pPro),c(chi,pPas)],
+    4:[c(dir,pTro),c(dis,pRot),c(dis,pRot,pDem),c(dis,pRot),c(ita,pCar)],
+    5:[c(mat,pChi),c(ing,pDiv),c(ita,pCar),c(ita,pCar),{}]};
+  o.settings=o.settings||{};o.settings.classe='2ª M · serale';o.settings.curYear=2;o.settings.reducedUntil='';
+  if(o.settings.aiProfile)o.settings.aiProfile=o.settings.aiProfile.replace('è al primo anno','frequenta il secondo anno (2ª M)');
+  o.ttVer='2627-2m';o._ttNew=true;return o;
 }
 
 /* ============ INTELLIGENZA ARTIFICIALE ============ */
@@ -2093,6 +2131,7 @@ VIEWS.settings=()=>{
   <div class="f2">${fld('Timer: minuti di studio',`<input type="number" min="5" max="90" value="${esc(S.pomoWork)}" onchange="setS('pomoWork',+this.value||25)">`)}${fld('Minuti di pausa',`<input type="number" min="1" max="30" value="${esc(S.pomoBreak)}" onchange="setS('pomoBreak',+this.value||5)">`)}</div></section>
   <section class="card"><div class="card-h"><h3>Sempre in borsa</h3></div>
   ${fld('Uno per riga',`<textarea rows="3" onchange="setS('always',this.value.split('\\n').map(x=>x.trim()).filter(Boolean))">${esc((S.always||[]).join('\n'))}</textarea>`)}</section>
+  ${syncCard()}
   <section class="card"><div class="card-h"><h3>Backup e sicurezza dei dati</h3></div>
   <p class="muted" style="margin-top:0">I dati vivono in questo telefono, con una copia di sicurezza automatica giornaliera interna. Per non perderli se cambi telefono: backup su Drive.</p>
   <div class="row"><button class="btn pri" onclick="exportData(true)">Backup completo</button><button class="btn" onclick="exportData(false)">Solo dati</button><button class="btn" onclick="$('#importInput').click()">Importa</button></div>
@@ -2380,7 +2419,8 @@ function impApply(){const R=_imp.res;let n=0;
     else if(k==='absences'){if(!st.att[x.date])st.att[x.date]={status:'absent',reason:limitFor(x.date)?limitFor(x.date).type:'Altro',note:x.note||'da registro'}}
   });
   _imp=null;_impImgs=[];save();render();toast(n+' elementi aggiunti')}
-if(st._ttNew){delete st._ttNew;save();setTimeout(()=>toast('Orario della 1ª M aggiornato (provvisorio dal 21/09)'),900);render()}
+syncNow(true);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')syncNow(true)});
+if(st._ttNew){delete st._ttNew;save();setTimeout(()=>toast('Orario della 2ª M aggiornato (dal 09/11/2026)'),900);render()}
 
 </script>
 </body>
