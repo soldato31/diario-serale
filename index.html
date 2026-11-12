@@ -687,7 +687,7 @@ function fmtNum(x){if(x===null||x===undefined||!isFinite(x))return'—';const a=
 function fmtOhm(r){if(r>=1e6)return fmtNum(r/1e6)+' MΩ';if(r>=1e3)return fmtNum(r/1e3)+' kΩ';return fmtNum(r)+' Ω'}
 
 /* ============ UTILITÀ ============ */
-const APP_VER='3.6';
+const APP_VER='3.7';
 const KEY='diarioSerale_v1';
 const WD=['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];
 const WDL=['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
@@ -2196,6 +2196,7 @@ function rendiconto(d,n){d=d||today();const L=lessonsFor(d).filter(l=>l.sub&&!l.
   const first=L[0]?L[0].start:'16:45',last=L.length?L[L.length-1].end:'21:45';
   sheet('Com\'è andata '+(d===today()?'stasera':fmtLong(d))+'?',
   `${n>1?`<p class="hint">Ci sono ${n} serate da registrare: parto dalla più recente.</p>`:''}
+  <div class="card" style="padding:10px"><b>🎤 Raccontamelo a voce</b><p class="hint" style="margin:4px 0">Premi 🎙 e parla: «Oggi a diritto imprenditore e impresa, articolo 2082; a TTRG proiezioni del prisma; verifica di matematica giovedì prossimo; interrogato in chimica, 7». Poi ✦: compilo io argomenti, compiti, verifiche e voti.</p><div class="inrow top"><textarea class="inp" id="rd_voce" rows="3" placeholder="…oppure scrivi qui"></textarea>${micBtn('rd_voce')}</div><button class="btn pri wide mt" onclick="rdVoce('${d}')">✦ Compila dalla voce</button></div>
   <h4>1 · Presenza</h4>${fld('Stasera ero',`<select id="rd_st"><option value="present" ${r.status!=='absent'&&r.status!=='off'?'selected':''}>Presente</option><option value="absent" ${r.status==='absent'?'selected':''}>Assente</option><option value="fad" ${r.status==='fad'?'selected':''}>A distanza</option><option value="off" ${r.status==='off'?'selected':''}>Niente lezione</option></select>`)}
   <div class="f2">${fld('Entrata',`<input type="time" id="rd_in" value="${esc(r.in||first)}">`)}${fld('Uscita',`<input type="time" id="rd_out" value="${esc(r.out||last)}">`)}</div>
   ${fld('Motivo assenza (se assente)',`<select id="rd_re">${opts(REASONS,r.reason||'Lavoro')}</select>`)}
@@ -2204,6 +2205,9 @@ function rendiconto(d,n){d=d||today();const L=lessonsFor(d).filter(l=>l.sub&&!l.
   <div class="row"><button class="btn sm" onclick="rdRow('Interrogazione')">🗣️ Interrogato</button><button class="btn sm" onclick="rdRow('Verifica svolta')">📝 Verifica fatta</button><button class="btn sm" onclick="rdRow('Verifica annunciata')">📅 Verifica annunciata</button><button class="btn sm" onclick="rdRow('Compito')">📌 Compiti</button></div>`,
   `<button class="btn left" onclick="(st.asked=st.asked||{})['${d}']=1;save();closeSheet();rendAuto()">Dopo</button><button class="btn pri" onclick="rdSave('${d}')">Salva</button>`);
   window._rdL=L.map(l=>l.i)}
+function rdVoce(d){const t=val('rd_voce');if(!t){toast('Detta o scrivi qualcosa');return}const stt=val('rd_st');st.att[d]=st.att[d]||{status:stt,in:stt==='present'?val('rd_in'):'',out:stt==='present'?val('rd_out'):'',reason:stt==='absent'?val('rd_re'):'',note:''};(st.asked=st.asked||{})[d]=1;save();closeSheet();
+  if(!hasGem()){st.notes.push({id:uid(),type:'note',title:'Serata del '+fmtDate(d),body:t,upd:new Date().toISOString()});save();toast('Salvato nelle note. Per compilare tutto da solo collega Gemini in Impostazioni.');return}
+  sub('imp');setTimeout(()=>{const e=document.getElementById('imp_t');if(e){e.value=(d!==today()?'Data della serata: '+d+'. ':'')+t;impRun()}},150)}
 function rdRow(k){const box=$('#rd_ev');const i=box.children.length;const subs=subOpts('');const fut=k==='Verifica annunciata'||k==='Compito';
   box.insertAdjacentHTML('beforeend',`<div class="card" data-k="${k}" style="padding:8px;margin:6px 0"><b>${k}</b><div class="f2">${fld('Materia',`<select class="rd_s">${subs}</select>`)}${fut?fld(k==='Compito'?'Entro il':'Data verifica',`<input type="date" class="rd_d" value="${addD(today(),7)}">`):fld('Voto (se c\'è)',`<input class="rd_v" inputmode="decimal" placeholder="es. 6,5">`)}</div>${fld(k==='Compito'?'Cosa':'Argomento / note',`<input class="rd_n">`)}</div>`)}
 function rdSave(d){const stt=val('rd_st');st.att[d]={status:stt,in:stt==='present'?val('rd_in'):'',out:stt==='present'?val('rd_out'):'',reason:stt==='absent'?val('rd_re'):'',note:''};
@@ -2447,7 +2451,7 @@ async function impRun(){
   const out=$('#imp_out');out.innerHTML='<section class="card"><p class="muted"><span class="spin"></span> Gemini sta leggendo…</p></section>';
   const subs=st.subjects.map(s=>s.name).join(', ');
   const P=`Oggi è ${today()} (${WDL[wdOf(today())]}). Materie dello studente: ${subs}.
-Dal contenuto seguente (testo e/o immagini da registro elettronico, Classroom, messaggi) estrai le informazioni scolastiche. Converti date relative ("per lunedì", "domani") in date ISO YYYY-MM-DD future rispetto a oggi. Usa per "subject" il nome della materia più vicino tra quelle elencate. Non inventare nulla: se un campo manca lascialo vuoto.
+Dal contenuto seguente (testo e/o immagini da registro elettronico, Classroom, messaggi) estrai le informazioni scolastiche. Converti date relative ("per lunedì", "domani") in date ISO YYYY-MM-DD future rispetto a oggi. Usa per "subject" il nome della materia più vicino tra quelle elencate. Non inventare nulla: se un campo manca lascialo vuoto. Per argomenti svolti, voti e interrogazioni senza data usa la data di oggi.
 Rispondi SOLO con JSON:
 {"tasks":[{"title":"","type":"Compito|Esercizi|Studio|Verifica|Interrogazione|Altro","subject":"","due":"YYYY-MM-DD","desc":""}],
 "grades":[{"subject":"","value":"7+","date":"YYYY-MM-DD","type":"Scritto|Orale|Pratico|Grafico","note":""}],
@@ -2482,7 +2486,7 @@ function impApply(){const R=_imp.res;let n=0;
   document.querySelectorAll('.imp.on').forEach(b=>{const k=b.dataset.k,x=R[k][+b.dataset.i];n++;
     if(k==='tasks'){if(!st.tasks.some(t=>t.title===x.title&&t.due===x.due))st.tasks.push({id:uid(),title:x.title,type:x.type,sub:x.sid,assigned:today(),due:x.due,desc:x.desc||'',done:false,topic:''})}
     else if(k==='grades'){st.grades.push({id:uid(),sub:x.sid,v:x.v,date:x.date,type:['Scritto','Orale','Pratico','Grafico'].includes(x.type)?x.type:'Scritto',w:1,note:x.note||'da registro'});const s=subById(x.sid);if(s)learn(subjKeyOf(s),x.note||'generale',Math.max(0,Math.min(1,(x.v-4)/6)),.35,'voto')}
-    else if(k==='topics'){const s=subById(x.sid),sk=s?subjKeyOf(s):subjKeyByName(x.subject||'');st.ext.push({sk,t:x.topic,d:x.date,sid:x.sid});exposure(sk,x.topic,'registro')}
+    else if(k==='topics'){const s=subById(x.sid),sk=s?subjKeyOf(s):subjKeyByName(x.subject||'');st.ext.push({sk,t:x.topic,d:x.date,sid:x.sid});exposure(sk,x.topic,'registro');const dd=x.date&&x.date<=today()?x.date:today();const Lz=lessonsFor(dd).find(l=>l.sub&&l.sub.id===x.sid);if(Lz){st.diary[dd]=st.diary[dd]||{};const o=st.diary[dd][Lz.i]=st.diary[dd][Lz.i]||{};if(!o.topic)o.topic=x.topic;else if(!norm(o.topic).includes(norm(x.topic)))o.note=(o.note?o.note+' · ':'')+x.topic}}
     else if(k==='events')st.notes.push({id:uid(),type:'appt',title:x.title,date:x.date,time:x.time||'',place:x.place||'',body:'Importato',upd:new Date().toISOString()});
     else if(k==='scrutini'){if(!st.scr.some(s=>s.date===x.date))st.scr.push({id:uid(),name:x.name,date:x.date,voti:{},note:''})}
     else if(k==='absences'){if(!st.att[x.date])st.att[x.date]={status:'absent',reason:limitFor(x.date)?limitFor(x.date).type:'Altro',note:x.note||'da registro'}}
