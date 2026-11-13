@@ -687,7 +687,7 @@ function fmtNum(x){if(x===null||x===undefined||!isFinite(x))return'—';const a=
 function fmtOhm(r){if(r>=1e6)return fmtNum(r/1e6)+' MΩ';if(r>=1e3)return fmtNum(r/1e3)+' kΩ';return fmtNum(r)+' Ω'}
 
 /* ============ UTILITÀ ============ */
-const APP_VER='3.7.1';
+const APP_VER='3.7.2';
 const KEY='diarioSerale_v1';
 const WD=['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];
 const WDL=['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
@@ -764,7 +764,8 @@ function migrate(s){
   if(s.v<3&&o.settings.aiProfile===s.settings?.aiProfile&&/primo periodo didattico/.test(o.settings.aiProfile))o.settings.aiProfile=AI_PROFILE;
   for(let x=1;x<=5;x++)if(!Array.isArray(o.tt[x]))o.tt[x]=[];
   o.subjects.forEach(x=>{if(x.credit===undefined)x.credit=false;if(!Array.isArray(x.materials))x.materials=[]});
-  o.v=3;return applyTT2627(o);
+  o=applyTT2627(o);if(!o.subjects.some(x=>/stori/i.test(x.name)))o.subjects.push({id:'s_storia',name:'Storia',color:PALETTE[o.subjects.length%PALETTE.length],materials:['Quaderno','Dispense Classroom'],credit:false});
+  o.v=3;return o;
 }
 const fixNomi=t=>t==null?t:String(t).replace(/Caramarossa/g,'Cramarossa').replace(/caramarossa/g,'cramarossa');
 function load(){try{const s=JSON.parse(fixNomi(localStorage.getItem(KEY)));if(s&&s.v)return migrate(s)}catch(e){}return applyTT2627(defaults())}
