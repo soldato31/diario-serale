@@ -687,7 +687,7 @@ function fmtNum(x){if(x===null||x===undefined||!isFinite(x))return'—';const a=
 function fmtOhm(r){if(r>=1e6)return fmtNum(r/1e6)+' MΩ';if(r>=1e3)return fmtNum(r/1e3)+' kΩ';return fmtNum(r)+' Ω'}
 
 /* ============ UTILITÀ ============ */
-const APP_VER='3.7';
+const APP_VER='3.7.1';
 const KEY='diarioSerale_v1';
 const WD=['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];
 const WDL=['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
@@ -766,7 +766,8 @@ function migrate(s){
   o.subjects.forEach(x=>{if(x.credit===undefined)x.credit=false;if(!Array.isArray(x.materials))x.materials=[]});
   o.v=3;return applyTT2627(o);
 }
-function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.v)return migrate(s)}catch(e){}return applyTT2627(defaults())}
+const fixNomi=t=>t==null?t:String(t).replace(/Caramarossa/g,'Cramarossa').replace(/caramarossa/g,'cramarossa');
+function load(){try{const s=JSON.parse(fixNomi(localStorage.getItem(KEY)));if(s&&s.v)return migrate(s)}catch(e){}return applyTT2627(defaults())}
 let st=load();
 let _idbT=null,_ver=0;
 function save(){
@@ -800,7 +801,7 @@ async function syncNow(quiet){const C=syncCfg();if(!C.token||_syncBusy)return;_s
   try{if(!C.gist){setSyncCfg({gist:await syncFindGist()})}
     const r=await fetch('https://api.github.com/gists/'+syncCfg().gist,{headers:syncHeaders(),cache:'no-store'});if(!r.ok)throw new Error('Gist non raggiungibile ('+r.status+')');
     const g=await r.json();const f=g.files[SYNC_FILE];let remote=null;
-    if(f){let txt=f.content;if(f.truncated)txt=await(await fetch(f.raw_url)).text();try{remote=JSON.parse(txt)}catch(e){}}
+    if(f){let txt=f.content;if(f.truncated)txt=await(await fetch(f.raw_url)).text();try{remote=JSON.parse(fixNomi(txt))}catch(e){}}
     const base=C.base||0,lu=st._upd||0,ru=remote&&remote.upd||0,localDirty=lu>base,remoteNew=remote&&remote.data&&ru>base;
     const key=st.settings.gemKey,model=st.settings.gemModel;let push=false;
     if(remote&&remote.data&&C.first){st=migrate(remote.data);st._upd=ru}
@@ -953,7 +954,7 @@ function applyTT2627(o){
     fis=S(['fisica'],'Fisica',['Quaderno','Calcolatrice scientifica']),chi=S(['chimica'],'Chimica',['Quaderno','Tavola periodica','Calcolatrice scientifica']),
     dis=S(['disegno','rappresentazione grafica'],'Disegno tecnico'),sta=S(['scienze e tecnologie applicate','tecnologie applicate'],'Scienze e tecnologie applicate',['Quaderno','Calcolatrice scientifica']),
     dir=S(['diritto'],'Diritto ed economia',['Quaderno','Libro di diritto']);
-  const pPro=P('Domenico','Procacci','Prof. Domenico Procacci',ita),pCar=P('Letizia','Caramarossa','Prof.ssa Letizia Caramarossa',ita),
+  const pPro=P('Domenico','Procacci','Prof. Domenico Procacci',ita),pCar=P('Letizia','Cramarossa','Prof.ssa Letizia Cramarossa',ita),
     pDiv=P('Elisabetta','Di Virgilio','Prof.ssa Elisabetta Di Virgilio',ing),pChi=P('Gianluca','Chiarappa','Prof. Gianluca Chiarappa',mat),
     pTro=P('Amalia','Troso','Prof.ssa Amalia Troso',dir),pVit=P('Elisabetta','Vitale','Prof.ssa Elisabetta Vitale',fis),
     pPep=P('Nicola','Peppino','Prof. Nicola Peppino (lab. fisica)',fis),pPas=P('Paolo','Pascale','Prof. Paolo Pascale',chi),
